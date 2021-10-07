@@ -11,10 +11,7 @@ namespace ProcessForUWP.Desktop
 {
     public class TCPListener : TcpListener
     {
-        public TCPListener(int port) : base(new IPEndPoint(IPAddress.Loopback.Address, port))
-        {
-
-        }
+        public TCPListener(int port) : base(new IPEndPoint(IPAddress.Loopback.Address, port)) { }
 
         public new TCPClient AcceptTcpClient()
         {
@@ -27,16 +24,16 @@ namespace ProcessForUWP.Desktop
         }
     }
 
-    public delegate void StringReceivedEventHandler(TCPClient sender, string str);
     public delegate void ByteReceivedEventHandler(TCPClient sender, byte b);
+    public delegate void StringReceivedEventHandler(TCPClient sender, string str);
 
     public class TCPClient
     {
-        public StringReceivedEventHandler StringReceived;
+        private TcpClient BasicClient;
         public ByteReceivedEventHandler ByteReceived;
+        public StringReceivedEventHandler StringReceived;
         public BinaryReader BinaryReader;
         public BinaryWriter BinaryWriter;
-        private TcpClient BasicClient;
 
         public TCPClient(ushort port)
         {

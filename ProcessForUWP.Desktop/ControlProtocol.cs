@@ -6,14 +6,14 @@ namespace ProcessForUWP.Desktop
 {
 	public enum ControlType
 	{
+		Kill,
 		Start,
-		BeginErrorReadLine,
-		BeginOutputReadLine,
+		Close,
 		Exited,
+		Dispose,
 		PropertyGet,
 		PropertySet,
-		Close,
-		Dispose,
-		Kill,
+		BeginErrorReadLine,
+		BeginOutputReadLine,
 	}
 }
