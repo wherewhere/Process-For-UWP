@@ -3,11 +3,11 @@
 
 基于[@Silver-Fang](https://github.com/Silver-Fang "Silver-Fang")的源码([Github](https://github.com/Silver-Fang/ProcessForUWP "ProcessForUWP"))
 
-<a href="https://github.com/wherewhere/ProcessForUWP/blob/master/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/wherewhere/ProcessForUWP.svg?label=License&style=flat-square"></a>
-<a href="https://github.com/wherewhere/ProcessForUWP/issues"><img alt="GitHub" src="https://img.shields.io/github/issues/wherewhere/ProcessForUWP.svg?label=Issues&style=flat-square"></a>
-<a href="https://github.com/wherewhere/ProcessForUWP/stargazers"><img alt="GitHub" src="https://img.shields.io/github/stars/wherewhere/ProcessForUWP.svg?label=Stars&style=flat-square"></a>
+<a href="https://github.com/wherewhere/Process-For-UWP/blob/master/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/wherewhere/Process-For-UWP.svg?label=License&style=flat-square"></a>
+<a href="https://github.com/wherewhere/Process-For-UWP/issues"><img alt="GitHub" src="https://img.shields.io/github/issues/wherewhere/Process-For-UWP.svg?label=Issues&style=flat-square"></a>
+<a href="https://github.com/wherewhere/Process-For-UWP/stargazers"><img alt="GitHub" src="https://img.shields.io/github/stars/wherewhere/Process-For-UWP.svg?label=Stars&style=flat-square"></a>
 
-<a href="https://github.com/wherewhere/ProcessForUWP/releases/latest"><img alt="GitHub All Releases" src="https://img.shields.io/github/downloads/wherewhere/ProcessForUWP/total.svg?label=DOWNLOAD&logo=github&style=for-the-badge"></a>
+<a href="https://github.com/wherewhere/Process-For-UWP/releases/latest"><img alt="GitHub All Releases" src="https://img.shields.io/github/downloads/wherewhere/Process-For-UWP/total.svg?label=DOWNLOAD&logo=github&style=for-the-badge"></a>
 <a href=""><img alt="Baidu Netdisk" src="https://img.shields.io/badge/download-%e5%af%86%e7%a0%81%ef%bc%9alIIl-magenta.svg?label=%e4%b8%8b%e8%bd%bd&logo=baidu&style=for-the-badge"></a>
 
 ## 目录
