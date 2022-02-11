@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.Collections.Generic;
 
 namespace ProcessForUWP.Core.Models
 {
@@ -9,7 +8,7 @@ namespace ProcessForUWP.Core.Models
         public string Package { get; set; }
         public ControlType ControlType { get; set; }
 
-        JsonSerializerSettings jSetting = new JsonSerializerSettings
+        private readonly JsonSerializerSettings jSetting = new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore,
             DefaultValueHandling = DefaultValueHandling.Ignore,

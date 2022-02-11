@@ -1,23 +1,13 @@
 ﻿using Newtonsoft.Json;
-using ProcessForUWP.UWP;
+using ProcessForUWP.UWP.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.AppService;
-using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Foundation.Metadata;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 // https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x804 上介绍了“空白页”项模板
 
@@ -30,8 +20,8 @@ namespace ProcessForUWP.Demo
     {
         public MainPage()
         {
-            this.InitializeComponent();
-            this.Loaded += async (_, __) =>
+            InitializeComponent();
+            Loaded += async (_, __) =>
             {
                 App.AppServiceConnected += App_AppServiceConnected;
                 if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
@@ -65,7 +55,7 @@ namespace ProcessForUWP.Demo
             string json = JsonConvert.SerializeObject(value);
             try
             {
-                ValueSet message = new ValueSet() { { "1", json } };
+                ValueSet message = new ValueSet() { { "UWP", json } };
                 _ = App.Connection.SendMessageAsync(message);
             }
             catch (Exception ex)
@@ -81,9 +71,9 @@ namespace ProcessForUWP.Demo
             {
                 try
                 {
-                    foreach (var item in args.Request.Message)
+                    foreach (KeyValuePair<string, object> item in args.Request.Message)
                     {
-                        Text.Text += $"+{item.Key}:{item.Value}\n";
+                        Text.Text += $"{item.Key}:{item.Value}\n";
                     }
                 }
                 catch (Exception ex)

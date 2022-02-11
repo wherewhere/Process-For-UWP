@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Security;
 using System.Text;
@@ -31,7 +29,7 @@ namespace ProcessForUWP.Core.Models
 
         public StartInfo(ProcessStartInfo info = null)
         {
-            if(info!=null)
+            if (info != null)
             {
                 SetStartInfo(info);
             }

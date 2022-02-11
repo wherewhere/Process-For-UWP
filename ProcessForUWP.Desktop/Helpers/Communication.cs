@@ -3,17 +3,11 @@ using ProcessForUWP.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.AppService;
 using Windows.Foundation.Collections;
 
-namespace ProcessForUWP.Desktop
+namespace ProcessForUWP.Desktop.Helpers
 {
     public static class Communication
     {
@@ -45,12 +39,12 @@ namespace ProcessForUWP.Desktop
             }
         }
 
-        public async static void SendMessage(object value)
+        public static async void SendMessage(object value)
         {
             string json = JsonConvert.SerializeObject(value);
             try
             {
-                ValueSet message = new ValueSet() { { $"1", json } };
+                ValueSet message = new ValueSet() { { $"Desktop", json } };
                 _ = await Connection.SendMessageAsync(message);
             }
             catch (Exception ex)
@@ -79,7 +73,7 @@ namespace ProcessForUWP.Desktop
         {
             try
             {
-                Message msg = JsonConvert.DeserializeObject<Message>(args.Request.Message["1"] as string);
+                Message msg = JsonConvert.DeserializeObject<Message>(args.Request.Message["UWP"] as string);
                 switch (msg.ControlType)
                 {
                     case ControlType.NewProcess:

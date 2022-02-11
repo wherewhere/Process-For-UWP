@@ -1,75 +1,10 @@
-﻿using Newtonsoft.Json;
-using ProcessForUWP.Core.Models;
+﻿using ProcessForUWP.Core.Models;
+using ProcessForUWP.UWP.Helpers;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Windows.ApplicationModel;
-using Windows.ApplicationModel.AppService;
-using Windows.Foundation.Collections;
-using Windows.UI.Xaml;
 
 namespace ProcessForUWP.UWP
 {
-    public static partial class ProcessHelper
-    {
-        public static Action<object> SendObject;
-        public static (bool IsReceived, Message Received) Received;
-
-        public static void SendMessages(ControlType typeEnum)
-        {
-            SendObject(Message.MakeMessage(typeEnum, 0));
-        }
-
-        public static void SendMessages(ControlType typeEnum, object message)
-        {
-            SendObject(Message.MakeMessage(typeEnum, 0, message));
-        }
-
-        public static void SendMessages(ControlType typeEnum, int id, object message)
-        {
-            SendObject(Message.MakeMessage(typeEnum, id, message));
-        }
-
-        public static void Connection_RequestReceived(AppServiceConnection sender, AppServiceRequestReceivedEventArgs args)
-        {
-            try
-            {
-                if (!Received.IsReceived)
-                {
-                    Message msg = JsonConvert.DeserializeObject<Message>(args.Request.Message["1"] as string);
-                    Received = (true, msg);
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
-        }
-
-        public static (bool IsReceive, Message Received) Receive()
-        {
-            CancellationTokenSource cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            try
-            {
-                while (!Received.IsReceived)
-                {
-                    cancellationToken.Token.ThrowIfCancellationRequested();
-                }
-                return (true, Received.Received);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-                return (false, null);
-            }
-        }
-    }
-
     public class DataReceivedEventArgs : EventArgs
     {
         public string Data;
@@ -90,16 +25,21 @@ namespace ProcessForUWP.UWP
         //public new int WorkingSet64 => (int)PropertyGet("WorkingSet64");
         //public new string ProcessName => (string)PropertyGet("ProcessName");
 
-        public new int Id
+        public new long Id
         {
-            get => (int)PropertyGet("Id");
+            get => (long)PropertyGet("Id");
         }
 
-        //public new int BasePriority
-        //{
-        //    get => BasePriority;
-        //    set => PropertySet("BasePriority", value);
-        //}
+        public new long SessionId
+        {
+            get => (long)PropertyGet("SessionId");
+        }
+
+        public new int BasePriority
+        {
+            get => BasePriority;
+            set => PropertySet("BasePriority", value);
+        }
 
         public new bool HasExited
         {
@@ -110,29 +50,29 @@ namespace ProcessForUWP.UWP
         {
             ProcessHelper.Received.IsReceived = false;
             ProcessHelper.SendMessages(ControlType.PropertyGet, 0, Name);
-            (bool IsReceive, Message Received) = ProcessHelper.Receive();
+            (bool IsReceive, Message Received) = ProcessHelper.Receive(ControlType.PropertySet);
             if (IsReceive)
             {
                 return Received.GetPackage<object>();
             }
             else
             {
-                throw new Exception("Process Unresponsive.");
+                throw new ArithmeticException("Process Unresponsive.");
             }
         }
 
-        //private void PropertySet(string Name, object value)
-        //{
-        //    ProcessHelper.SendMessage((byte)ControlType.PropertySet);
-        //    ProcessHelper.SendMessage(Name);
-        //    ProcessHelper.SendMessage(value);
-        //}
+        private void PropertySet(string Name, object value)
+        {
+            ProcessHelper.Received.IsReceived = false;
+            ProcessHelper.SendMessages(ControlType.PropertySet, 0, (Name, value));
+        }
 
         public Process()
         {
             ProcessHelper.Received.IsReceived = false;
             ProcessHelper.SendMessages(ControlType.NewProcess, 0);
-            if (!ProcessHelper.Receive().IsReceive)
+            (bool IsReceive, Message Received) = ProcessHelper.Receive(ControlType.Message);
+            if (!IsReceive && Received.GetPackage<StatuesType>() == StatuesType.Success)
             {
                 throw new InvalidOperationException("Cannot initializes process.");
             }
@@ -162,18 +102,18 @@ namespace ProcessForUWP.UWP
 
         public new void Close()
         {
-            //ProcessHelper.SendMessages(ControlType.Close);
+            ProcessHelper.SendMessages(ControlType.Close);
         }
 
         public new void Dispose()
         {
-            //ProcessHelper.SendMessages(ControlType.Dispose);
+            ProcessHelper.SendMessages(ControlType.Dispose);
             base.Dispose();
         }
 
         public new void Kill()
         {
-            //ProcessHelper.SendMessages(ControlType.Kill);
+            ProcessHelper.SendMessages(ControlType.Kill);
         }
 
         //private void DataClient_MessageReceived(TCPClient sender,string message)

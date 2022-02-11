@@ -5,9 +5,8 @@
     xmlns:local="using:ProcessForUWP.Demo"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-    <Grid>
+    mc:Ignorable="d">
+    <ScrollViewer>
         <TextBlock x:Name="Text"/>
-    </Grid>
+    </ScrollViewer>
 </Page>

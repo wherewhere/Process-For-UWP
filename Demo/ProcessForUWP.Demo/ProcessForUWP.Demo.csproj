@@ -162,10 +162,6 @@
       <Project>{3c4bb582-f918-4936-b729-9a9f830e48c1}</Project>
       <Name>ProcessForUWP.UWP</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ProcessForUWP.Demo.Core\ProcessForUWP.Demo.Core.csproj">
-      <Project>{dfb1ea3a-dbbb-4df4-b800-d1e3a7c3facf}</Project>
-      <Name>ProcessForUWP.Demo.Core</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="WindowsDesktop, Version=10.0.22000.0">

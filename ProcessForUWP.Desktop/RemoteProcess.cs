@@ -1,12 +1,10 @@
 ﻿using Newtonsoft.Json;
+using ProcessForUWP.Core.Helpers;
 using ProcessForUWP.Core.Models;
+using ProcessForUWP.Desktop.Helpers;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
-using Windows.ApplicationModel;
 using Windows.ApplicationModel.AppService;
-using Windows.Foundation.Collections;
 
 namespace ProcessForUWP.Desktop
 {
@@ -33,7 +31,7 @@ namespace ProcessForUWP.Desktop
         {
             try
             {
-                Message msg = JsonConvert.DeserializeObject<Message>(args.Request.Message["1"] as string);
+                Message msg = JsonConvert.DeserializeObject<Message>(args.Request.Message["UWP"] as string);
                 switch (msg.ControlType)
                 {
                     case ControlType.Kill:
@@ -53,23 +51,43 @@ namespace ProcessForUWP.Desktop
                     case ControlType.Dispose:
                         Process.Dispose();
                         break;
+                    case ControlType.PropertyGet:
+                        try
+                        {
+                            object value = Process.GetProperty(msg.GetPackage<string>());
+                            Communication.SendMessages(ControlType.PropertySet, value);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.Write(ex);
+                        }
+                        break;
+                    case ControlType.PropertySet:
+                        try
+                        {
+                            (string name, object value) = msg.GetPackage<(string, object)>();
+                            Process.SetProperty(name, value);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.Write(ex);
+                        }
+                        break;
                     case ControlType.BeginErrorReadLine:
                         Process.BeginErrorReadLine();
                         break;
                     case ControlType.BeginOutputReadLine:
                         Process.BeginOutputReadLine();
                         break;
-                    case ControlType.PropertyGet:
-                        break;
                 }
             }
             catch
             {
-                
+
             }
         }
 
-        private void Process_ErrorDataReceived(object sender,DataReceivedEventArgs e)
+        private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
             Communication.SendMessage(e.Data);
         }
