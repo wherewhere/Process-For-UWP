@@ -1,7 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+	<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	<PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.22000.194" />
+	<PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
+	<PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProcessForUWP.Core\ProcessForUWP.Core.csproj" />
+  </ItemGroup>
+	
 </Project>

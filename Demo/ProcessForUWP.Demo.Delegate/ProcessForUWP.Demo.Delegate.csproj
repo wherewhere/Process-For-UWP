@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<LangVersion>9.0</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\ProcessForUWP.Desktop\ProcessForUWP.Desktop.csproj" />
+	  <ProjectReference Include="..\ProcessForUWP.Demo.Core\ProcessForUWP.Demo.Core.csproj" />
+	</ItemGroup>
+
+</Project>
