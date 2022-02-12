@@ -27,19 +27,18 @@
 然后在打包项目的 `Package.appxmanifest` 中添加：
 ```xml
 <Package
-  	...
-  	xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10" 
-  	IgnorableNamespaces="uap rescap desktop">
 	...
-  	<Applications>
-	  	<Application>
-		  	...
+	xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10" 
+	IgnorableNamespaces="uap rescap desktop">
+	...
+	<Applications>
+		<Application>
+			...
 			<Extensions>
 				<uap:Extension Category="windows.appService">
-          			<uap:AppService Name="ProcessForUWP.Delegate"/>
-        		</uap:Extension>
+					<uap:AppService Name="ProcessForUWP.Delegate"/>
+				</uap:Extension>
 				<desktop:Extension Category="windows.fullTrustProcess" Executable="【桌面应用项目的路径，如：ProcessForUWP.Demo.Delegate\ProcessForUWP.Demo.Delegate.exe】" />
-				</desktop:Extension>
 			</Extensions>
 		</Application>
 	</Applications>
@@ -51,120 +50,120 @@
 public sealed partial class App : Application
 {
 	public App()
-    {
-        ...
-        EnteredBackground += App_EnteredBackground;
-        LeavingBackground += App_LeavingBackground;
-    }
+	{
+		...
+		EnteredBackground += App_EnteredBackground;
+		LeavingBackground += App_LeavingBackground;
+	}
 
 	...
 
 	protected override async void OnLaunched(LaunchActivatedEventArgs e)
-    {
-        await InitializeConnection();
+	{
+		await InitializeConnection();
 		...
 	}
 
 	private async Task InitializeConnection()
-    {
-        if (Connection == null)
-        {
-            if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
-            {
-                try
-                {
-                    await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
-                    AppServiceConnected += (sender, e) =>
-                    {
-                        Connection.RequestReceived += ProcessHelper.Connection_RequestReceived;
-                        ProcessHelper.SendMessage = (value) =>
-                        {
-                            string json = JsonConvert.SerializeObject(value);
-                            try
-                            {
-                                ValueSet message = new ValueSet() { { "UWP", json } };
-                                _ = Connection.SendMessageAsync(message);
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine(ex);
-                                Debug.WriteLine(json);
-                            }
-                        };
-                    };
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex);
-                }
-            }
-        }
-    }
+	{
+		if (Connection == null)
+		{
+			if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
+			{
+				try
+				{
+					await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
+					AppServiceConnected += (sender, e) =>
+					{
+						Connection.RequestReceived += ProcessHelper.Connection_RequestReceived;
+						ProcessHelper.SendMessage = (value) =>
+						{
+							string json = JsonConvert.SerializeObject(value);
+							try
+							{
+								ValueSet message = new ValueSet() { { "UWP", json } };
+								_ = Connection.SendMessageAsync(message);
+							}
+							catch (Exception ex)
+							{
+								Debug.WriteLine(ex);
+								Debug.WriteLine(json);
+							}
+						};
+					};
+				}
+				catch (Exception ex)
+				{
+					Debug.WriteLine(ex);
+				}
+			}
+		}
+	}
 
 	...
 
 	public static BackgroundTaskDeferral AppServiceDeferral = null;
-    public static AppServiceConnection Connection = null;
-    public static event EventHandler AppServiceDisconnected;
-    public static event EventHandler<AppServiceTriggerDetails> AppServiceConnected;
-    public static bool IsForeground = false;
+	public static AppServiceConnection Connection = null;
+	public static event EventHandler AppServiceDisconnected;
+	public static event EventHandler<AppServiceTriggerDetails> AppServiceConnected;
+	public static bool IsForeground = false;
 
-    private void App_LeavingBackground(object sender, LeavingBackgroundEventArgs e)
-    {
-        IsForeground = true;
-    }
+	private void App_LeavingBackground(object sender, LeavingBackgroundEventArgs e)
+	{
+		IsForeground = true;
+	}
 
-    private void App_EnteredBackground(object sender, EnteredBackgroundEventArgs e)
-    {
-        IsForeground = false;
-    }
+	private void App_EnteredBackground(object sender, EnteredBackgroundEventArgs e)
+	{
+		IsForeground = false;
+	}
 
-    /// <summary>
-    /// Handles connection requests to the app service
-    /// </summary>
-    protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)
-    {
-        base.OnBackgroundActivated(args);
+	/// <summary>
+	/// Handles connection requests to the app service
+	/// </summary>
+	protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)
+	{
+		base.OnBackgroundActivated(args);
+		
+		if (args.TaskInstance.TriggerDetails is AppServiceTriggerDetails details)
+		{
+			// only accept connections from callers in the same package
+			if (details.CallerPackageFamilyName == Package.Current.Id.FamilyName)
+			{
+				// connection established from the fulltrust process
+				AppServiceDeferral = args.TaskInstance.GetDeferral();
+				args.TaskInstance.Canceled += OnTaskCanceled;
+				
+				Connection = details.AppServiceConnection;
+				AppServiceConnected?.Invoke(this, args.TaskInstance.TriggerDetails as AppServiceTriggerDetails);
+			}
+		}
+	}
 
-        if (args.TaskInstance.TriggerDetails is AppServiceTriggerDetails details)
-        {
-            // only accept connections from callers in the same package
-            if (details.CallerPackageFamilyName == Package.Current.Id.FamilyName)
-            {
-                // connection established from the fulltrust process
-                AppServiceDeferral = args.TaskInstance.GetDeferral();
-                args.TaskInstance.Canceled += OnTaskCanceled;
-
-                Connection = details.AppServiceConnection;
-                AppServiceConnected?.Invoke(this, args.TaskInstance.TriggerDetails as AppServiceTriggerDetails);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Task canceled here means the app service client is gone
-    /// </summary>
-    private void OnTaskCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason)
-    {
-        AppServiceDeferral?.Complete();
-        AppServiceDeferral = null;
-        Connection = null;
-        AppServiceDisconnected?.Invoke(this, null);
-    }
+	/// <summary>
+	/// Task canceled here means the app service client is gone
+	/// </summary>
+	private void OnTaskCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason)
+	{
+		AppServiceDeferral?.Complete();
+		AppServiceDeferral = null;
+		Connection = null;
+		AppServiceDisconnected?.Invoke(this, null);
+	}
 }
 ```
 在桌面项目的 `Program.cs` 中添加新代码文件，输入以下代码：
 ```cs
 internal class Program
 {
-    private static void Main(string[] args)
-    {
-        Communication.InitializeAppServiceConnection();
-        while (true)
-        {
-            Thread.Sleep(100);
-        }
-    }
+	private static void Main(string[] args)
+	{
+		Communication.InitializeAppServiceConnection();
+		while (true)
+		{
+			Thread.Sleep(100);
+		}
+	}
 }
 ```
 在解决方案配置管理器中，三个项目的平台需保持一致，建议都设为x64。生成都要勾选。部署只需勾选打包项目，UWP 项目和桌面项目都不需部署。  
