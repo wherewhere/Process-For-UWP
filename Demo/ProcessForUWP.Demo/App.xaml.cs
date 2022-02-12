@@ -1,8 +1,14 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using ProcessForUWP.UWP.Helpers;
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.AppService;
 using Windows.ApplicationModel.Background;
+using Windows.Foundation.Collections;
+using Windows.Foundation.Metadata;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -32,8 +38,10 @@ namespace ProcessForUWP.Demo
         /// 将在启动应用程序以打开特定文件等情况下使用。
         /// </summary>
         /// <param name="e">有关启动请求和过程的详细信息。</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        protected override async void OnLaunched(LaunchActivatedEventArgs e)
         {
+            await InitializeConnection();
+
             Frame rootFrame = Window.Current.Content as Frame;
 
             // 不要在窗口已包含内容时重复应用程序初始化，
@@ -65,6 +73,42 @@ namespace ProcessForUWP.Demo
                 }
                 // 确保当前窗口处于活动状态
                 Window.Current.Activate();
+            }
+        }
+
+        private async Task InitializeConnection()
+        {
+            if (Connection == null)
+            {
+                if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
+                {
+                    try
+                    {
+                        await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
+                        AppServiceConnected += (sender, e) =>
+                        {
+                            Connection.RequestReceived += ProcessHelper.Connection_RequestReceived;
+                            ProcessHelper.SendMessage = (value) =>
+                            {
+                                string json = JsonConvert.SerializeObject(value);
+                                try
+                                {
+                                    ValueSet message = new ValueSet() { { "UWP", json } };
+                                    _ = Connection.SendMessageAsync(message);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine(ex);
+                                    Debug.WriteLine(json);
+                                }
+                            };
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex);
+                    }
+                }
             }
         }
 

@@ -3,6 +3,7 @@ using ProcessForUWP.UWP.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.AppService;
 using Windows.Foundation.Collections;
@@ -23,20 +24,11 @@ namespace ProcessForUWP.Demo
         public MainPage()
         {
             InitializeComponent();
-            Loaded += async (_, __) =>
-            {
-                App.AppServiceConnected += App_AppServiceConnected;
-                if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
-                {
-                    await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
-                }
-            };
+            GetProcess();
         }
 
-        private void App_AppServiceConnected(object sender, AppServiceTriggerDetails e)
+        private async void GetProcess()
         {
-            App.Connection.RequestReceived += ProcessHelper.Connection_RequestReceived;
-            ProcessHelper.SendMessage = SendMessage;
             ProcessStartInfo info = new ProcessStartInfo
             {
                 FileName = @"C:\Users\qq251\Downloads\Github\APK-Installer-UWP\APKInstaller\APKInstaller\platform-tools\adb.exe",
@@ -45,7 +37,7 @@ namespace ProcessForUWP.Demo
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
             };
-            UWP.Process process = new UWP.Process();
+            UWP.Process process = await Task.Run(() => { return new UWP.Process(); });
             process.Start(info);
             process.BeginErrorReadLine();
             process.BeginOutputReadLine();
@@ -55,21 +47,6 @@ namespace ProcessForUWP.Demo
         private void OnOutputDataReceived(UWP.Process sender, UWP.DataReceivedEventArgs e)
         {
             _ = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => Text.Text += $"{e.Data}\n");
-        }
-
-        private void SendMessage(object value)
-        {
-            string json = JsonConvert.SerializeObject(value);
-            try
-            {
-                ValueSet message = new ValueSet() { { "UWP", json } };
-                _ = App.Connection.SendMessageAsync(message);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-                Debug.WriteLine(json);
-            }
         }
     }
 }

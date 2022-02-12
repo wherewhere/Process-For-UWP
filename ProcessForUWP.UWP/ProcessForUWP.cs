@@ -69,6 +69,7 @@ namespace ProcessForUWP.UWP
 
         public Process()
         {
+            if (!ProcessHelper.IsInitialized) { throw new InvalidOperationException("Have not initialized process yet."); }
             ProcessHelper.RequestReceived += Connection_RequestReceived;
             (bool IsReceive, Message Received) = ProcessHelper.GetMessages(MessageType.NewProcess, 0, MessageType.Message);
             if (!IsReceive && Received.GetPackage<StatuesType>() == StatuesType.Success)
