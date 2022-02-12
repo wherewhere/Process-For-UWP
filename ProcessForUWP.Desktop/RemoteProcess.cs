@@ -32,37 +32,37 @@ namespace ProcessForUWP.Desktop
             try
             {
                 Message msg = JsonConvert.DeserializeObject<Message>(args.Request.Message["UWP"] as string);
-                switch (msg.ControlType)
+                switch (msg.MessageType)
                 {
-                    case ControlType.Kill:
+                    case MessageType.Kill:
                         Process.Kill();
                         break;
-                    case ControlType.Start:
+                    case MessageType.Start:
                         ProcessStartInfo info = msg.GetPackage<StartInfo>().GetStartInfo();
                         Process.StartInfo = info;
                         Process.Start();
                         break;
-                    case ControlType.Close:
+                    case MessageType.Close:
                         Process.Close();
                         break;
-                    case ControlType.Refresh:
+                    case MessageType.Refresh:
                         Process.Refresh();
                         break;
-                    case ControlType.Dispose:
+                    case MessageType.Dispose:
                         Process.Dispose();
                         break;
-                    case ControlType.PropertyGet:
+                    case MessageType.PropertyGet:
                         try
                         {
                             object value = Process.GetProperty(msg.GetPackage<string>());
-                            Communication.SendMessages(ControlType.PropertySet, value);
+                            Communication.SendMessages(MessageType.PropertySet, value);
                         }
                         catch (Exception ex)
                         {
                             Debug.Write(ex);
                         }
                         break;
-                    case ControlType.PropertySet:
+                    case MessageType.PropertySet:
                         try
                         {
                             (string name, object value) = msg.GetPackage<(string, object)>();
@@ -73,10 +73,10 @@ namespace ProcessForUWP.Desktop
                             Debug.Write(ex);
                         }
                         break;
-                    case ControlType.BeginErrorReadLine:
+                    case MessageType.BeginErrorReadLine:
                         Process.BeginErrorReadLine();
                         break;
-                    case ControlType.BeginOutputReadLine:
+                    case MessageType.BeginOutputReadLine:
                         Process.BeginOutputReadLine();
                         break;
                 }
@@ -89,18 +89,19 @@ namespace ProcessForUWP.Desktop
 
         private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
-            Communication.SendMessage(e.Data);
+            Communication.SendMessages(MessageType.ErrorData, e.Data);
         }
 
         private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            Communication.SendMessage(e.Data);
+            Communication.SendMessages(MessageType.OutputData, e.Data);
         }
 
         private void Process_Exited(object sender, EventArgs e)
         {
             Process.OutputDataReceived -= Process_OutputDataReceived;
             Process.ErrorDataReceived -= Process_ErrorDataReceived;
+            Communication.SendMessages(MessageType.Exited);
             Process.Exited -= Process_Exited;
         }
 

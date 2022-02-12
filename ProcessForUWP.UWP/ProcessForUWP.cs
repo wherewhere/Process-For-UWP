@@ -1,7 +1,11 @@
-﻿using ProcessForUWP.Core.Models;
+﻿using Newtonsoft.Json;
+using ProcessForUWP.Core.Models;
 using ProcessForUWP.UWP.Helpers;
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Text;
+using Windows.ApplicationModel.AppService;
 
 namespace ProcessForUWP.UWP
 {
@@ -18,22 +22,25 @@ namespace ProcessForUWP.UWP
 
     public class Process : System.Diagnostics.Process
     {
-        //public new EventHandler Exited;
-        //public new DataReceivedEventHandler ErrorDataReceived;
-        //public new DataReceivedEventHandler OutputDataReceived;
+        public new StreamReader StandardError;
+        public new StreamWriter StandardInput;
+        public new StreamReader StandardOutput;
 
-        //public new int WorkingSet64 => (int)PropertyGet("WorkingSet64");
-        //public new string ProcessName => (string)PropertyGet("ProcessName");
+        private StreamWriter ErrorStreamWriter;
+        private StreamWriter OutputStreamWriter;
 
-        public new long Id
-        {
-            get => (long)PropertyGet("Id");
-        }
+        private MemoryStream ErrorStream = new MemoryStream();
+        private MemoryStream OutputStream = new MemoryStream();
 
-        public new long SessionId
-        {
-            get => (long)PropertyGet("SessionId");
-        }
+        public new event EventHandler Exited;
+        public new event DataReceivedEventHandler ErrorDataReceived;
+        public new event DataReceivedEventHandler OutputDataReceived;
+
+        public new long Id => (long)PropertyGet("Id");
+        public new long SessionId => (long)PropertyGet("SessionId");
+        public new bool HasExited => (bool)PropertyGet("HasExited");
+        public new int WorkingSet64 => (int)PropertyGet("WorkingSet64");
+        public new string ProcessName => (string)PropertyGet("ProcessName");
 
         public new int BasePriority
         {
@@ -41,16 +48,9 @@ namespace ProcessForUWP.UWP
             set => PropertySet("BasePriority", value);
         }
 
-        public new bool HasExited
-        {
-            get => (bool)PropertyGet("HasExited");
-        }
-
         private object PropertyGet(string Name)
         {
-            ProcessHelper.Received.IsReceived = false;
-            ProcessHelper.SendMessages(ControlType.PropertyGet, 0, Name);
-            (bool IsReceive, Message Received) = ProcessHelper.Receive(ControlType.PropertySet);
+            (bool IsReceive, Message Received) = ProcessHelper.GetMessages(MessageType.PropertyGet, 0, Name, MessageType.PropertySet);
             if (IsReceive)
             {
                 return Received.GetPackage<object>();
@@ -64,14 +64,13 @@ namespace ProcessForUWP.UWP
         private void PropertySet(string Name, object value)
         {
             ProcessHelper.Received.IsReceived = false;
-            ProcessHelper.SendMessages(ControlType.PropertySet, 0, (Name, value));
+            ProcessHelper.SendMessages(MessageType.PropertySet, 0, (Name, value));
         }
 
         public Process()
         {
-            ProcessHelper.Received.IsReceived = false;
-            ProcessHelper.SendMessages(ControlType.NewProcess, 0);
-            (bool IsReceive, Message Received) = ProcessHelper.Receive(ControlType.Message);
+            ProcessHelper.RequestReceived += Connection_RequestReceived;
+            (bool IsReceive, Message Received) = ProcessHelper.GetMessages(MessageType.NewProcess, 0, MessageType.Message);
             if (!IsReceive && Received.GetPackage<StatuesType>() == StatuesType.Success)
             {
                 throw new InvalidOperationException("Cannot initializes process.");
@@ -80,40 +79,93 @@ namespace ProcessForUWP.UWP
 
         public new void Start()
         {
-            ProcessHelper.SendMessages(ControlType.Start, 0, new StartInfo(StartInfo));
-            //ControlClient.ListenByte();
+            if (StartInfo.RedirectStandardError)
+            {
+                StandardError = new StreamReader(ErrorStream);
+                ErrorStreamWriter = new StreamWriter(ErrorStream);
+            }
+            if (StartInfo.RedirectStandardOutput)
+            {
+                StandardOutput = new StreamReader(OutputStream);
+                OutputStreamWriter = new StreamWriter(OutputStream);
+            }
+            ProcessHelper.SendMessages(MessageType.Start, 0, new StartInfo(StartInfo));
         }
 
         public new void Start(ProcessStartInfo info)
         {
             StartInfo = info;
-            ProcessHelper.SendMessages(ControlType.Start, 0, new StartInfo(StartInfo));
+            Start();
         }
 
         public new void BeginErrorReadLine()
         {
-            ProcessHelper.SendMessages(ControlType.BeginErrorReadLine);
+            ProcessHelper.SendMessages(MessageType.BeginErrorReadLine);
         }
 
         public new void BeginOutputReadLine()
         {
-            ProcessHelper.SendMessages(ControlType.BeginOutputReadLine);
+            ProcessHelper.SendMessages(MessageType.BeginOutputReadLine);
         }
 
         public new void Close()
         {
-            ProcessHelper.SendMessages(ControlType.Close);
+            ProcessHelper.SendMessages(MessageType.Close);
         }
 
         public new void Dispose()
         {
-            ProcessHelper.SendMessages(ControlType.Dispose);
+            ProcessHelper.RequestReceived -= Connection_RequestReceived;
+            ProcessHelper.SendMessages(MessageType.Dispose);
+            OutputStreamWriter?.Dispose();
+            ErrorStreamWriter?.Dispose();
+            StandardOutput?.Dispose();
+            StandardInput?.Dispose();
+            StandardError?.Dispose();
+            OutputStream?.Dispose();
+            ErrorStream?.Dispose();
             base.Dispose();
         }
 
         public new void Kill()
         {
-            ProcessHelper.SendMessages(ControlType.Kill);
+            ProcessHelper.SendMessages(MessageType.Kill);
+        }
+
+        public void Connection_RequestReceived(AppServiceConnection sender, AppServiceRequestReceivedEventArgs args)
+        {
+            try
+            {
+                Message msg = JsonConvert.DeserializeObject<Message>(args.Request.Message["Desktop"] as string);
+                if (msg.MessageType == MessageType.Exited)
+                {
+                    Exited?.Invoke(this, new EventArgs());
+                }
+                else if (msg.MessageType == MessageType.ErrorData)
+                {
+                    string line = msg.GetPackage<string>();
+                    ErrorDataReceived?.Invoke(this, new DataReceivedEventArgs(line));
+                    if (StartInfo.RedirectStandardError)
+                    {
+                        ErrorStreamWriter.WriteLine(line);
+                        ErrorStreamWriter.Flush();
+                    }
+                }
+                else if (msg.MessageType == MessageType.OutputData)
+                {
+                    string line = msg.GetPackage<string>();
+                    OutputDataReceived?.Invoke(this, new DataReceivedEventArgs(line));
+                    if (StartInfo.RedirectStandardOutput)
+                    {
+                        OutputStreamWriter.WriteLine(line);
+                        OutputStreamWriter.Flush();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
         }
 
         //private void DataClient_MessageReceived(TCPClient sender,string message)

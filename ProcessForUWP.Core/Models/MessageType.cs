@@ -1,6 +1,6 @@
 ﻿namespace ProcessForUWP.Core.Models
 {
-    public enum ControlType
+    public enum MessageType
     {
         Kill,
         Start,
@@ -9,7 +9,9 @@
         Refresh,
         Dispose,
         Message,
+        ErrorData,
         NewProcess,
+        OutputData,
         PropertyGet,
         PropertySet,
         BeginErrorReadLine,

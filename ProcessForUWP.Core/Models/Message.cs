@@ -6,7 +6,7 @@ namespace ProcessForUWP.Core.Models
     {
         public int ID { get; set; }
         public string Package { get; set; }
-        public ControlType ControlType { get; set; }
+        public MessageType MessageType { get; set; }
 
         private readonly JsonSerializerSettings jSetting = new JsonSerializerSettings
         {
@@ -14,14 +14,14 @@ namespace ProcessForUWP.Core.Models
             DefaultValueHandling = DefaultValueHandling.Ignore,
         };
 
-        public Message(ControlType typeEnum, int id = 0, object msg = null)
+        public Message(MessageType typeEnum, int id = 0, object msg = null)
         {
             ID = id;
             SetPackage(msg);
-            ControlType = typeEnum;
+            MessageType = typeEnum;
         }
 
-        public static Message MakeMessage(ControlType typeEnum, int id = 0, object mag = null)
+        public static Message MakeMessage(MessageType typeEnum, int id = 0, object mag = null)
         {
             return new Message(typeEnum, id, mag);
         }

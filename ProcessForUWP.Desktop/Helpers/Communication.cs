@@ -54,17 +54,17 @@ namespace ProcessForUWP.Desktop.Helpers
             }
         }
 
-        public static void SendMessages(ControlType typeEnum)
+        public static void SendMessages(MessageType typeEnum)
         {
             SendMessage(Message.MakeMessage(typeEnum));
         }
 
-        public static void SendMessages(ControlType typeEnum, object message = null)
+        public static void SendMessages(MessageType typeEnum, object message = null)
         {
             SendMessage(Message.MakeMessage(typeEnum, 0, message));
         }
 
-        public static void SendMessages(ControlType typeEnum, int id, object message = null)
+        public static void SendMessages(MessageType typeEnum, int id, object message = null)
         {
             SendMessage(Message.MakeMessage(typeEnum, id, message));
         }
@@ -74,11 +74,11 @@ namespace ProcessForUWP.Desktop.Helpers
             try
             {
                 Message msg = JsonConvert.DeserializeObject<Message>(args.Request.Message["UWP"] as string);
-                switch (msg.ControlType)
+                switch (msg.MessageType)
                 {
-                    case ControlType.NewProcess:
+                    case MessageType.NewProcess:
                         Processes.Add(new RemoteProcess());
-                        SendMessages(ControlType.Message, 0, StatuesType.Success);
+                        SendMessages(MessageType.Message, 0, StatuesType.Success);
                         break;
                 }
             }

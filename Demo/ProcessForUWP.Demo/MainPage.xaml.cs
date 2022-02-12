@@ -7,6 +7,8 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.AppService;
 using Windows.Foundation.Collections;
 using Windows.Foundation.Metadata;
+using Windows.System;
+using Windows.UI.Core;
 using Windows.UI.Xaml.Controls;
 
 // https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x804 上介绍了“空白页”项模板
@@ -33,9 +35,8 @@ namespace ProcessForUWP.Demo
 
         private void App_AppServiceConnected(object sender, AppServiceTriggerDetails e)
         {
-            App.Connection.RequestReceived += Connection_RequestReceived;
             App.Connection.RequestReceived += ProcessHelper.Connection_RequestReceived;
-            ProcessHelper.SendObject = SendMessage;
+            ProcessHelper.SendMessage = SendMessage;
             ProcessStartInfo info = new ProcessStartInfo
             {
                 FileName = @"C:\Users\qq251\Downloads\Github\APK-Installer-UWP\APKInstaller\APKInstaller\platform-tools\adb.exe",
@@ -48,6 +49,12 @@ namespace ProcessForUWP.Demo
             process.Start(info);
             process.BeginErrorReadLine();
             process.BeginOutputReadLine();
+            process.OutputDataReceived += OnOutputDataReceived;
+        }
+
+        private void OnOutputDataReceived(UWP.Process sender, UWP.DataReceivedEventArgs e)
+        {
+            _ = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => Text.Text += $"{e.Data}\n");
         }
 
         private void SendMessage(object value)
@@ -63,24 +70,6 @@ namespace ProcessForUWP.Demo
                 Debug.WriteLine(ex);
                 Debug.WriteLine(json);
             }
-        }
-
-        private async void Connection_RequestReceived(AppServiceConnection sender, AppServiceRequestReceivedEventArgs args)
-        {
-            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-            {
-                try
-                {
-                    foreach (KeyValuePair<string, object> item in args.Request.Message)
-                    {
-                        Text.Text += $"{item.Key}:{item.Value}\n";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Text.Text = ex.ToString();
-                }
-            });
         }
     }
 }
