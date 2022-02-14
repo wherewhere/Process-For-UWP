@@ -16,8 +16,6 @@ namespace ProcessForUWP.Core.Models
         public bool RedirectStandardError { get; set; }
         public bool RedirectStandardInput { get; set; }
         public bool RedirectStandardOutput { get; set; }
-        public Encoding StandardErrorEncoding { get; set; }
-        public Encoding StandardOutputEncoding { get; set; }
         public string UserName { get; set; }
         public bool UseShellExecute { get; set; }
         public string WorkingDirectory { get; set; }
@@ -48,8 +46,6 @@ namespace ProcessForUWP.Core.Models
                 RedirectStandardError = info.RedirectStandardError;
                 RedirectStandardInput = info.RedirectStandardInput;
                 RedirectStandardOutput = info.RedirectStandardOutput;
-                StandardErrorEncoding = info.StandardErrorEncoding;
-                StandardOutputEncoding = info.StandardOutputEncoding;
                 UserName = info.UserName;
                 UseShellExecute = info.UseShellExecute;
                 WorkingDirectory = info.WorkingDirectory;
@@ -74,8 +70,6 @@ namespace ProcessForUWP.Core.Models
                 RedirectStandardError = RedirectStandardError,
                 RedirectStandardInput = RedirectStandardInput,
                 RedirectStandardOutput = RedirectStandardOutput,
-                StandardErrorEncoding = StandardErrorEncoding,
-                StandardOutputEncoding = StandardOutputEncoding,
                 UserName = UserName,
                 UseShellExecute = UseShellExecute,
                 WorkingDirectory = WorkingDirectory,

@@ -11,41 +11,73 @@ namespace ProcessForUWP.UWP.Helpers
 {
     public static partial class ProcessHelper
     {
+        private static int ID = 0;
+        public static int GetID => ID++;
+        private static readonly object locker = new object();
+
         public static Action<object> SendMessage;
         public static (bool IsReceived, Message Received) Received;
         public static event TypedEventHandler<AppServiceConnection, AppServiceRequestReceivedEventArgs> RequestReceived;
 
         public static void SendMessages(MessageType typeEnum)
         {
-            SendMessages(typeEnum, 0);
+            lock (locker)
+            {
+                SendMessage(Message.MakeMessage(typeEnum));
+            }
+        }
+
+        public static void SendMessages(MessageType typeEnum, int id)
+        {
+            lock (locker)
+            {
+                SendMessage(Message.MakeMessage(typeEnum, id));
+            }
         }
 
         public static void SendMessages(MessageType typeEnum, object message)
         {
-            SendMessages(typeEnum, 0, message);
+            lock (locker)
+            {
+                SendMessage(Message.MakeMessage(typeEnum, 0, message));
+            }
         }
 
         public static void SendMessages(MessageType typeEnum, int id, object message)
         {
-            SendMessage(Message.MakeMessage(typeEnum, id, message));
+            lock (locker)
+            {
+                SendMessage(Message.MakeMessage(typeEnum, id, message));
+            }
         }
 
 
         public static (bool IsReceive, Message Received) GetMessages(MessageType sendEnum, MessageType receiveEnum)
         {
-            return GetMessages(sendEnum, 0, receiveEnum);
+            Received.IsReceived = false;
+            SendMessages(sendEnum);
+            return Receive(0, receiveEnum);
+        }
+
+        public static (bool IsReceive, Message Received) GetMessages(MessageType sendEnum, int id, MessageType receiveEnum)
+        {
+            Received.IsReceived = false;
+            SendMessages(sendEnum, id);
+            return Receive(id, receiveEnum);
         }
 
         public static (bool IsReceive, Message Received) GetMessages(MessageType sendEnum, object message, MessageType receiveEnum)
         {
-            return GetMessages(sendEnum, 0, message, receiveEnum);
+            Received.IsReceived = false;
+            SendMessages(sendEnum, message);
+            return Receive(0, receiveEnum);
         }
 
         public static (bool IsReceive, Message Received) GetMessages(MessageType sendEnum, int id, object message, MessageType receiveEnum)
         {
             Received.IsReceived = false;
             SendMessages(sendEnum, id, message);
-            return Receive(receiveEnum);
+            return Receive(id, receiveEnum);
         }
 
         public static void Connection_RequestReceived(AppServiceConnection sender, AppServiceRequestReceivedEventArgs args)
@@ -94,7 +126,7 @@ namespace ProcessForUWP.UWP.Helpers
             }
         }
 
-        public static (bool IsReceive, Message Received) Receive(MessageType? type = null)
+        public static (bool IsReceive, Message Received) Receive(int id, MessageType? type = null)
         {
             CancellationTokenSource cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             try
@@ -104,7 +136,7 @@ namespace ProcessForUWP.UWP.Helpers
                 {
                     cancellationToken.Token.ThrowIfCancellationRequested();
                 }
-                if (Received.Received != null && (type == null || Received.Received.MessageType == type))
+                if (Received.Received != null && Received.Received.ID == id && (type == null || Received.Received.MessageType == type))
                 {
                     return (true, Received.Received);
                 }
@@ -122,6 +154,23 @@ namespace ProcessForUWP.UWP.Helpers
             finally
             {
                 Received.IsReceived = false;
+            }
+        }
+
+        public static void CopyFile(string sourceFileName, string destFileName, bool overwrite)
+        {
+            SendMessages(MessageType.CopyFile, (sourceFileName, destFileName, overwrite));
+            try
+            {
+                (bool iscopyed, Message message) = Receive(0, MessageType.CopyFile);
+                if (!(iscopyed && message.GetPackage<StatuesType>() == StatuesType.Success))
+                {
+                    throw new Exception();
+                }
+            }
+            catch (Exception)
+            {
+                throw new FieldAccessException("Cannot copy this file.");
             }
         }
     }

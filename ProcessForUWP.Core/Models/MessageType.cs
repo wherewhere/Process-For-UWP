@@ -9,6 +9,7 @@
         Refresh,
         Dispose,
         Message,
+        CopyFile,
         ErrorData,
         NewProcess,
         OutputData,

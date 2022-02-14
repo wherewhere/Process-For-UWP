@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading;
 using Windows.ApplicationModel.AppService;
 
 namespace ProcessForUWP.UWP
@@ -22,6 +23,8 @@ namespace ProcessForUWP.UWP
 
     public class Process : System.Diagnostics.Process
     {
+        private int CommunicationID = ProcessHelper.GetID;
+
         public new StreamReader StandardError;
         public new StreamWriter StandardInput;
         public new StreamReader StandardOutput;
@@ -42,6 +45,8 @@ namespace ProcessForUWP.UWP
         public new int WorkingSet64 => (int)PropertyGet("WorkingSet64");
         public new string ProcessName => (string)PropertyGet("ProcessName");
 
+        public bool IsExited;
+
         public new int BasePriority
         {
             get => BasePriority;
@@ -50,7 +55,7 @@ namespace ProcessForUWP.UWP
 
         private object PropertyGet(string Name)
         {
-            (bool IsReceive, Message Received) = ProcessHelper.GetMessages(MessageType.PropertyGet, 0, Name, MessageType.PropertySet);
+            (bool IsReceive, Message Received) = ProcessHelper.GetMessages(MessageType.PropertyGet, CommunicationID, Name, MessageType.PropertySet);
             if (IsReceive)
             {
                 return Received.GetPackage<object>();
@@ -64,14 +69,14 @@ namespace ProcessForUWP.UWP
         private void PropertySet(string Name, object value)
         {
             ProcessHelper.Received.IsReceived = false;
-            ProcessHelper.SendMessages(MessageType.PropertySet, 0, (Name, value));
+            ProcessHelper.SendMessages(MessageType.PropertySet, CommunicationID, (Name, value));
         }
 
         public Process()
         {
             if (!ProcessHelper.IsInitialized) { throw new InvalidOperationException("Have not initialized process yet."); }
             ProcessHelper.RequestReceived += Connection_RequestReceived;
-            (bool IsReceive, Message Received) = ProcessHelper.GetMessages(MessageType.NewProcess, 0, MessageType.Message);
+            (bool IsReceive, Message Received) = ProcessHelper.GetMessages(MessageType.NewProcess, CommunicationID, MessageType.Message);
             if (!IsReceive && Received.GetPackage<StatuesType>() == StatuesType.Success)
             {
                 throw new InvalidOperationException("Cannot initializes process.");
@@ -80,6 +85,7 @@ namespace ProcessForUWP.UWP
 
         public new void Start()
         {
+            IsExited = false;
             if (StartInfo.RedirectStandardError)
             {
                 StandardError = new StreamReader(ErrorStream);
@@ -90,7 +96,7 @@ namespace ProcessForUWP.UWP
                 StandardOutput = new StreamReader(OutputStream);
                 OutputStreamWriter = new StreamWriter(OutputStream);
             }
-            ProcessHelper.SendMessages(MessageType.Start, 0, new StartInfo(StartInfo));
+            ProcessHelper.SendMessages(MessageType.Start, CommunicationID, new StartInfo(StartInfo));
         }
 
         public new void Start(ProcessStartInfo info)
@@ -101,23 +107,18 @@ namespace ProcessForUWP.UWP
 
         public new void BeginErrorReadLine()
         {
-            ProcessHelper.SendMessages(MessageType.BeginErrorReadLine);
+            ProcessHelper.SendMessages(MessageType.BeginErrorReadLine, CommunicationID);
         }
 
         public new void BeginOutputReadLine()
         {
-            ProcessHelper.SendMessages(MessageType.BeginOutputReadLine);
+            ProcessHelper.SendMessages(MessageType.BeginOutputReadLine, CommunicationID);
         }
 
         public new void Close()
         {
-            ProcessHelper.SendMessages(MessageType.Close);
-        }
-
-        public new void Dispose()
-        {
+            ProcessHelper.SendMessages(MessageType.Close, CommunicationID);
             ProcessHelper.RequestReceived -= Connection_RequestReceived;
-            ProcessHelper.SendMessages(MessageType.Dispose);
             OutputStreamWriter?.Dispose();
             ErrorStreamWriter?.Dispose();
             StandardOutput?.Dispose();
@@ -125,12 +126,36 @@ namespace ProcessForUWP.UWP
             StandardError?.Dispose();
             OutputStream?.Dispose();
             ErrorStream?.Dispose();
+            IsExited = true;
+        }
+
+        public new void Dispose()
+        {
+            ProcessHelper.SendMessages(MessageType.Dispose, CommunicationID);
+            ProcessHelper.RequestReceived -= Connection_RequestReceived;
+            OutputStreamWriter?.Dispose();
+            ErrorStreamWriter?.Dispose();
+            StandardOutput?.Dispose();
+            StandardInput?.Dispose();
+            StandardError?.Dispose();
+            OutputStream?.Dispose();
+            ErrorStream?.Dispose();
+            IsExited = true;
             base.Dispose();
         }
 
         public new void Kill()
         {
-            ProcessHelper.SendMessages(MessageType.Kill);
+            ProcessHelper.SendMessages(MessageType.Kill, CommunicationID);
+            ProcessHelper.RequestReceived -= Connection_RequestReceived;
+            OutputStreamWriter?.Dispose();
+            ErrorStreamWriter?.Dispose();
+            StandardOutput?.Dispose();
+            StandardInput?.Dispose();
+            StandardError?.Dispose();
+            OutputStream?.Dispose();
+            ErrorStream?.Dispose();
+            IsExited = true;
         }
 
         public void Connection_RequestReceived(AppServiceConnection sender, AppServiceRequestReceivedEventArgs args)
@@ -138,28 +163,32 @@ namespace ProcessForUWP.UWP
             try
             {
                 Message msg = JsonConvert.DeserializeObject<Message>(args.Request.Message["Desktop"] as string);
-                if (msg.MessageType == MessageType.Exited)
+                if (msg.ID == CommunicationID)
                 {
-                    Exited?.Invoke(this, new EventArgs());
-                }
-                else if (msg.MessageType == MessageType.ErrorData)
-                {
-                    string line = msg.GetPackage<string>();
-                    ErrorDataReceived?.Invoke(this, new DataReceivedEventArgs(line));
-                    if (StartInfo.RedirectStandardError)
+                    if (msg.MessageType == MessageType.Exited)
                     {
-                        ErrorStreamWriter.WriteLine(line);
-                        ErrorStreamWriter.Flush();
+                        IsExited = true;
+                        Exited?.Invoke(this, new EventArgs());
                     }
-                }
-                else if (msg.MessageType == MessageType.OutputData)
-                {
-                    string line = msg.GetPackage<string>();
-                    OutputDataReceived?.Invoke(this, new DataReceivedEventArgs(line));
-                    if (StartInfo.RedirectStandardOutput)
+                    else if (msg.MessageType == MessageType.ErrorData)
                     {
-                        OutputStreamWriter.WriteLine(line);
-                        OutputStreamWriter.Flush();
+                        string line = msg.GetPackage<string>();
+                        ErrorDataReceived?.Invoke(this, new DataReceivedEventArgs(line));
+                        if (StartInfo.RedirectStandardError)
+                        {
+                            ErrorStreamWriter.WriteLine(line);
+                            ErrorStreamWriter.Flush();
+                        }
+                    }
+                    else if (msg.MessageType == MessageType.OutputData)
+                    {
+                        string line = msg.GetPackage<string>();
+                        OutputDataReceived?.Invoke(this, new DataReceivedEventArgs(line));
+                        if (StartInfo.RedirectStandardOutput)
+                        {
+                            OutputStreamWriter.WriteLine(line);
+                            OutputStreamWriter.Flush();
+                        }
                     }
                 }
             }
@@ -169,24 +198,26 @@ namespace ProcessForUWP.UWP
             }
         }
 
-        //private void DataClient_MessageReceived(TCPClient sender,string message)
-        //{
-        //    OutputDataReceived(this, new DataReceivedEventArgs(message));
-        //}
+        public new void WaitForExit()
+        {
+            while (!IsExited) ;
+        }
 
-        //private void ErrorClint_MessageReceived(TCPClient sender, string message)
-        //{
-        //    ErrorDataReceived(this, new DataReceivedEventArgs(message));
-        //}
-
-        //private void ControlClient_ByteReceived(TCPClient sender, Byte message)
-        //{
-        //    switch(message)
-        //    {
-        //        case (byte)ControlType.Exited:
-        //            Exited(this, new EventArgs());
-        //            break;
-        //    }
-        //}
+        public new bool WaitForExit(int milliseconds)
+        {
+            CancellationTokenSource cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(milliseconds));
+            try
+            {
+                while (!IsExited)
+                {
+                    cancellationToken.Token.ThrowIfCancellationRequested();
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }
