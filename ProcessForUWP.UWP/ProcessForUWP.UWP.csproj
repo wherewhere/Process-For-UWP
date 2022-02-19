@@ -3,7 +3,7 @@
   <PropertyGroup>
 	<Authors>wherewhere</Authors>	  	
 	<LangVersion>latest</LangVersion>
-	<VersionPrefix>0.0.1</VersionPrefix>
+	<VersionPrefix>0.0.2</VersionPrefix>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Process;UWP;UAP</PackageTags>
     <TargetFramework>netstandard2.0</TargetFramework>
