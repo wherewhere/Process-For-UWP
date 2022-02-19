@@ -2,7 +2,6 @@
 using ProcessForUWP.Core.Models;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading;
 using Windows.ApplicationModel.AppService;
 using Windows.Foundation;

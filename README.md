@@ -7,8 +7,8 @@
 [![Issues](https://img.shields.io/github/issues/wherewhere/Process-For-UWP.svg?label=Issues&style=flat-square)](https://github.com/wherewhere/Process-For-UWP/issues "Issues")
 [![Stargazers](https://img.shields.io/github/stars/wherewhere/Process-For-UWP.svg?label=Stars&style=flat-square)](https://github.com/wherewhere/Process-For-UWP/stargazers "Stargazers")
 
-[![GitHub All Releases](https://img.shields.io/github/downloads/wherewhere/Process-For-UWP/total.svg?label=DOWNLOAD&logo=github&style=for-the-badge)](https://github.com/wherewhere/Process-For-UWP/releases/latest "GitHub All Releases")
-[![Baidu Netdisk](https://img.shields.io/badge/download-%e5%af%86%e7%a0%81%ef%bc%9alIIl-magenta.svg?label=%e4%b8%8b%e8%bd%bd&logo=baidu&style=for-the-badge)](https://github.com/wherewhere/Process-For-UWP/releases/latest "Baidu Netdisk")
+[![UWP](https://img.shields.io/nuget/dt/ProcessForUWP.UWP.svg?logo=NuGet&style=for-the-badge)](https://www.nuget.org/packages/ProcessForUWP.UWP "UWP")
+[![Desktop](https://img.shields.io/nuget/dt/ProcessForUWP.Desktop.svg?logo=NuGet&style=for-the-badge)](https://www.nuget.org/packages/ProcessForUWP.Desktop "Desktop")
 
 ## 目录
 - [Process for UWP](#process-for-uwp)

@@ -1,22 +1,12 @@
 ﻿using Microsoft.UI.Xaml.Controls;
-using Newtonsoft.Json;
 using ProcessForUWP.Demo.Helpers;
 using ProcessForUWP.Demo.Pages;
 using ProcessForUWP.Demo.ViewModels;
-using ProcessForUWP.UWP.Helpers;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
-using Windows.ApplicationModel;
-using Windows.ApplicationModel.AppService;
 using Windows.ApplicationModel.Core;
-using Windows.Foundation.Collections;
-using Windows.Foundation.Metadata;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using Windows.System;
-using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 

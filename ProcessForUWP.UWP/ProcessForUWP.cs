@@ -4,7 +4,6 @@ using ProcessForUWP.UWP.Helpers;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Threading;
 using Windows.ApplicationModel.AppService;
 
@@ -23,7 +22,7 @@ namespace ProcessForUWP.UWP
 
     public class Process : System.Diagnostics.Process
     {
-        private int CommunicationID = ProcessHelper.GetID;
+        private readonly int CommunicationID = ProcessHelper.GetID;
 
         public new StreamReader StandardError;
         public new StreamWriter StandardInput;
@@ -32,8 +31,8 @@ namespace ProcessForUWP.UWP
         private StreamWriter ErrorStreamWriter;
         private StreamWriter OutputStreamWriter;
 
-        private MemoryStream ErrorStream = new MemoryStream();
-        private MemoryStream OutputStream = new MemoryStream();
+        private readonly MemoryStream ErrorStream = new MemoryStream();
+        private readonly MemoryStream OutputStream = new MemoryStream();
 
         public new event EventHandler Exited;
         public new event DataReceivedEventHandler ErrorDataReceived;
@@ -200,7 +199,10 @@ namespace ProcessForUWP.UWP
 
         public new void WaitForExit()
         {
-            while (!IsExited) ;
+            while (!IsExited)
+            {
+                ;
+            }
         }
 
         public new bool WaitForExit(int milliseconds)

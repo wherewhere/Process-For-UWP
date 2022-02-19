@@ -1,13 +1,6 @@
-﻿using Microsoft.Toolkit.Uwp;
-using Microsoft.Toolkit.Uwp.Helpers;
+﻿using Microsoft.Toolkit.Uwp.Helpers;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Windows.Storage;
 using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.ViewManagement;
@@ -76,6 +69,6 @@ namespace ProcessForUWP.Demo.Helpers
 
         string IObjectSerializer.Serialize<T>(T value) => JsonConvert.SerializeObject(value, typeof(T), Formatting.Indented, settings);
 
-        public T Deserialize<T>(string value) => JsonConvert.DeserializeObject<T>((string)value, settings);
+        public T Deserialize<T>(string value) => JsonConvert.DeserializeObject<T>(value, settings);
     }
 }

@@ -1,10 +1,6 @@
 ﻿using ProcessForUWP.Demo.Helpers;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Core;
 
@@ -12,7 +8,7 @@ namespace ProcessForUWP.Demo.ViewModels
 {
     public class TerminalViewModel : INotifyPropertyChanged
     {
-        private string _path;
+        private readonly string _path;
         private UWP.Process _process;
 
         private string _outputData = string.Empty;
