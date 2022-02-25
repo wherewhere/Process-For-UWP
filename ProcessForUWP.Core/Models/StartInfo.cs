@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Security;
+using System.Text;
 
 namespace ProcessForUWP.Core.Models
 {
@@ -76,7 +77,8 @@ namespace ProcessForUWP.Core.Models
                 ErrorDialogParentHandle = ErrorDialogParentHandle,
                 Verb = Verb,
                 WindowStyle = WindowStyle,
-                PasswordInClearText = PasswordInClearText
+                PasswordInClearText = PasswordInClearText,
+                StandardOutputEncoding = Encoding.UTF8
             };
         }
     }

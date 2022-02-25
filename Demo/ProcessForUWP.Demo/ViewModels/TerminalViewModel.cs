@@ -46,8 +46,8 @@ namespace ProcessForUWP.Demo.ViewModels
                     RedirectStandardOutput = true,
                     CreateNoWindow = true
                 };
-                _process = await Task.Run(() => { return new UWP.Process(); });
-                _process.Start(info);
+                _process = await Task.Run(() => { return new UWP.Process { StartInfo = info }; });
+                _process.Start();
                 _process.BeginErrorReadLine();
                 _process.BeginOutputReadLine();
                 _process.OutputDataReceived += OnOutputDataReceived;

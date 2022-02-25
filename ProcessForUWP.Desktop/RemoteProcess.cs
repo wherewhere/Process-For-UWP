@@ -8,9 +8,9 @@ using Windows.ApplicationModel.AppService;
 
 namespace ProcessForUWP.Desktop
 {
-    public class RemoteProcess : IDisposable
+    internal class RemoteProcess : IDisposable
     {
-        private readonly Process Process = new Process();
+        internal readonly Process Process = new Process();
         private readonly int CommunicationID = 0;
         private bool disposedValue;
 

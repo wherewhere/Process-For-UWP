@@ -10,12 +10,18 @@ using Windows.Foundation.Collections;
 
 namespace ProcessForUWP.Desktop.Helpers
 {
+    /// <summary>
+    /// Communication Helpers for RemoteProcess.
+    /// </summary>
     public static class Communication
     {
         private static readonly object locker = new object();
-        public static List<RemoteProcess> Processes = new List<RemoteProcess>();
-        public static AppServiceConnection Connection;
+        internal static List<RemoteProcess> Processes = new List<RemoteProcess>();
+        internal static AppServiceConnection Connection;
 
+        /// <summary>
+        /// Initialize Communication.
+        /// </summary>
         public static async void InitializeAppServiceConnection()
         {
             try
@@ -41,7 +47,7 @@ namespace ProcessForUWP.Desktop.Helpers
             }
         }
 
-        public static async void SendMessage(object value)
+        internal static async void SendMessage(object value)
         {
             string json = JsonConvert.SerializeObject(value);
             try
@@ -56,7 +62,7 @@ namespace ProcessForUWP.Desktop.Helpers
             }
         }
 
-        public static void SendMessages(MessageType typeEnum)
+        internal static void SendMessages(MessageType typeEnum)
         {
             lock (locker)
             {
@@ -64,7 +70,7 @@ namespace ProcessForUWP.Desktop.Helpers
             }
         }
 
-        public static void SendMessages(MessageType typeEnum, int id)
+        internal static void SendMessages(MessageType typeEnum, int id)
         {
             lock (locker)
             {
@@ -72,7 +78,7 @@ namespace ProcessForUWP.Desktop.Helpers
             }
         }
 
-        public static void SendMessages(MessageType typeEnum, object message)
+        internal static void SendMessages(MessageType typeEnum, object message)
         {
             lock (locker)
             {
@@ -80,7 +86,7 @@ namespace ProcessForUWP.Desktop.Helpers
             }
         }
 
-        public static void SendMessages(MessageType typeEnum, int id, object message)
+        internal static void SendMessages(MessageType typeEnum, int id, object message)
         {
             lock (locker)
             {
@@ -116,6 +122,20 @@ namespace ProcessForUWP.Desktop.Helpers
             catch (Exception ex)
             {
                 Debug.WriteLine(ex);
+            }
+        }
+
+        /// <summary>
+        /// Kill all processes which have created.
+        /// </summary>
+        public static void KillAllProcesses()
+        {
+            foreach (RemoteProcess Process in Processes)
+            {
+                if (!Process.Process.HasExited)
+                {
+                    Process.Process.Kill();
+                }
             }
         }
 

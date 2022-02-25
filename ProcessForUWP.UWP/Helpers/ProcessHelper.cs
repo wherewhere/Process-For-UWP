@@ -8,17 +8,23 @@ using Windows.Foundation;
 
 namespace ProcessForUWP.UWP.Helpers
 {
+    /// <summary>
+    /// Communication Helpers for Process.
+    /// </summary>
     public static partial class ProcessHelper
     {
         private static int ID = 0;
-        public static int GetID => ID++;
+        internal static int GetID => ID++;
         private static readonly object locker = new object();
 
+        /// <summary>
+        /// SendMessage Action.
+        /// </summary>
         public static Action<object> SendMessage;
-        public static (bool IsReceived, Message Received) Received;
-        public static event TypedEventHandler<AppServiceConnection, AppServiceRequestReceivedEventArgs> RequestReceived;
+        internal static (bool IsReceived, Message Received) Received;
+        internal static event TypedEventHandler<AppServiceConnection, AppServiceRequestReceivedEventArgs> RequestReceived;
 
-        public static void SendMessages(MessageType typeEnum)
+        internal static void SendMessages(MessageType typeEnum)
         {
             lock (locker)
             {
@@ -26,7 +32,7 @@ namespace ProcessForUWP.UWP.Helpers
             }
         }
 
-        public static void SendMessages(MessageType typeEnum, int id)
+        internal static void SendMessages(MessageType typeEnum, int id)
         {
             lock (locker)
             {
@@ -34,7 +40,7 @@ namespace ProcessForUWP.UWP.Helpers
             }
         }
 
-        public static void SendMessages(MessageType typeEnum, object message)
+        internal static void SendMessages(MessageType typeEnum, object message)
         {
             lock (locker)
             {
@@ -42,7 +48,7 @@ namespace ProcessForUWP.UWP.Helpers
             }
         }
 
-        public static void SendMessages(MessageType typeEnum, int id, object message)
+        internal static void SendMessages(MessageType typeEnum, int id, object message)
         {
             lock (locker)
             {
@@ -51,34 +57,39 @@ namespace ProcessForUWP.UWP.Helpers
         }
 
 
-        public static (bool IsReceive, Message Received) GetMessages(MessageType sendEnum, MessageType receiveEnum)
+        internal static (bool IsReceive, Message Received) GetMessages(MessageType sendEnum, MessageType receiveEnum)
         {
             Received.IsReceived = false;
             SendMessages(sendEnum);
             return Receive(0, receiveEnum);
         }
 
-        public static (bool IsReceive, Message Received) GetMessages(MessageType sendEnum, int id, MessageType receiveEnum)
+        internal static (bool IsReceive, Message Received) GetMessages(MessageType sendEnum, int id, MessageType receiveEnum)
         {
             Received.IsReceived = false;
             SendMessages(sendEnum, id);
             return Receive(id, receiveEnum);
         }
 
-        public static (bool IsReceive, Message Received) GetMessages(MessageType sendEnum, object message, MessageType receiveEnum)
+        internal static (bool IsReceive, Message Received) GetMessages(MessageType sendEnum, object message, MessageType receiveEnum)
         {
             Received.IsReceived = false;
             SendMessages(sendEnum, message);
             return Receive(0, receiveEnum);
         }
 
-        public static (bool IsReceive, Message Received) GetMessages(MessageType sendEnum, int id, object message, MessageType receiveEnum)
+        internal static (bool IsReceive, Message Received) GetMessages(MessageType sendEnum, int id, object message, MessageType receiveEnum)
         {
             Received.IsReceived = false;
             SendMessages(sendEnum, id, message);
             return Receive(id, receiveEnum);
         }
 
+        /// <summary>
+        /// Receive Message.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         public static void Connection_RequestReceived(AppServiceConnection sender, AppServiceRequestReceivedEventArgs args)
         {
             RequestReceived?.Invoke(sender, args);
@@ -96,7 +107,7 @@ namespace ProcessForUWP.UWP.Helpers
             }
         }
 
-        public static bool IsInitialized
+        internal static bool IsInitialized
         {
             get
             {
@@ -125,7 +136,7 @@ namespace ProcessForUWP.UWP.Helpers
             }
         }
 
-        public static (bool IsReceive, Message Received) Receive(int id, MessageType? type = null)
+        internal static (bool IsReceive, Message Received) Receive(int id, MessageType? type = null)
         {
             CancellationTokenSource cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             try
@@ -156,6 +167,13 @@ namespace ProcessForUWP.UWP.Helpers
             }
         }
 
+        /// <summary>
+        /// Copy File through Delegate.
+        /// </summary>
+        /// <param name="sourceFileName"></param>
+        /// <param name="destFileName"></param>
+        /// <param name="overwrite"></param>
+        /// <exception cref="FieldAccessException">Cannot copy this file.</exception>
         public static void CopyFile(string sourceFileName, string destFileName, bool overwrite)
         {
             SendMessages(MessageType.CopyFile, (sourceFileName, destFileName, overwrite));
