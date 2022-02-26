@@ -140,10 +140,11 @@ namespace ProcessForUWP.UWP
         /// <summary>
         /// Initializes a new instance of the ProcessForUWP.UWP.Process class.
         /// </summary>
+        /// <param name="s">The amount of time, in seconds, to wait for instance process.</param>
         /// <exception cref="InvalidOperationException">Initializes process failed.</exception>
-        public Process()
+        public Process(double s = 10)
         {
-            if (!ProcessHelper.IsInitialized) { throw new InvalidOperationException("Have not initialized process yet."); }
+            if (!ProcessHelper.IsInitialized(s)) { throw new InvalidOperationException("Have not initialized process yet."); }
             ProcessHelper.RequestReceived += Connection_RequestReceived;
             (bool IsReceive, Message Received) = ProcessHelper.GetMessages(MessageType.NewProcess, CommunicationID, MessageType.Message);
             if (!IsReceive || Received?.GetPackage<StatuesType>() != StatuesType.Success)

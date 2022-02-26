@@ -3,12 +3,10 @@
   <PropertyGroup>
 	<Authors>wherewhere</Authors>	  	
 	<LangVersion>latest</LangVersion>
-	<VersionPrefix>0.0.2</VersionPrefix>
+	<VersionPrefix>0.0.3</VersionPrefix>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Process;UWP;UAP</PackageTags>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageReleaseNotes>这是第一个版本</PackageReleaseNotes>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Copyright>Copyright © 2017 - 2022 wherewhere.</Copyright>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <RepositoryUrl>https://github.com/wherewhere/Process-For-UWP</RepositoryUrl>

@@ -3,15 +3,14 @@
   <PropertyGroup>
 	<Authors>wherewhere</Authors>	  	
 	<LangVersion>latest</LangVersion>
-	<VersionPrefix>0.0.3</VersionPrefix>
+	<VersionPrefix>0.0.4</VersionPrefix>
     <RepositoryType>git</RepositoryType>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Copyright>Copyright © 2017 - 2022 wherewhere.</Copyright>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageTags>Process;UWP;Desktop;WPF;Cli;WinFrom;Delegate</PackageTags>
     <RepositoryUrl>https://github.com/wherewhere/Process-For-UWP</RepositoryUrl>
     <PackageProjectUrl>https://github.com/wherewhere/Process-For-UWP</PackageProjectUrl>
-    <TargetFrameworks>net4.6.2;net4.7.2;net4.8;netstandard2.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net4.6.2;net4.7.2;net4.8;netstandard2.0;netstandard2.1;netcoreapp3.1</TargetFrameworks>
     <Description>一种适用于 UWP 平台的 Process 方法
 本项目基于 @Silver-Fang 的项目 ProcessForUWP，与其不同的是，本项目利用了通信接口 AppServiceConnection 来进行应用间的通信，所以不用执行一次就弹一次 UAC，但是使用起来会比较麻烦。目前仍在开发当中，如果有兴趣欢迎加入。
 本 Nuget 包为桌面端，具体使用方法请查阅项目仓库中的 Readme。</Description>

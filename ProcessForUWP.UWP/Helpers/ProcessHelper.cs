@@ -107,31 +107,28 @@ namespace ProcessForUWP.UWP.Helpers
             }
         }
 
-        internal static bool IsInitialized
+        internal static bool IsInitialized(double s = 10)
         {
-            get
+            if (SendMessage != null)
             {
-                if (SendMessage != null)
+                return true;
+            }
+            else
+            {
+                CancellationTokenSource cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(s));
+                try
                 {
+                    Debug.WriteLine($"Warning!\nYou may initialize a process when the app is not Initialized.\nDo not do this or app will crash after {s}s if app still not Initialized.");
+                    while (SendMessage == null)
+                    {
+                        cancellationToken.Token.ThrowIfCancellationRequested();
+                    }
                     return true;
                 }
-                else
+                catch (Exception ex)
                 {
-                    CancellationTokenSource cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-                    try
-                    {
-                        Debug.WriteLine("Warning!\nYou may initialize a process when the app is not Initialized.\nDo not do this or app will crash after 60s if app still not Initialized.");
-                        while (SendMessage == null)
-                        {
-                            cancellationToken.Token.ThrowIfCancellationRequested();
-                        }
-                        return true;
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex);
-                        return false;
-                    }
+                    Debug.WriteLine(ex);
+                    return false;
                 }
             }
         }
