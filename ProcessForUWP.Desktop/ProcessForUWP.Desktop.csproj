@@ -5,10 +5,10 @@
 	<LangVersion>latest</LangVersion>
 	<VersionPrefix>0.0.4</VersionPrefix>
     <RepositoryType>git</RepositoryType>
-    <Copyright>Copyright © 2017 - 2022 wherewhere.</Copyright>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageTags>Process;UWP;Desktop;WPF;Cli;WinFrom;Delegate</PackageTags>
     <RepositoryUrl>https://github.com/wherewhere/Process-For-UWP</RepositoryUrl>
+    <Copyright>Copyright © 2017 - 2022 wherewhere. All Rights Reserved.</Copyright>
     <PackageProjectUrl>https://github.com/wherewhere/Process-For-UWP</PackageProjectUrl>
     <TargetFrameworks>net4.6.2;net4.7.2;net4.8;netstandard2.0;netstandard2.1;netcoreapp3.1</TargetFrameworks>
     <Description>一种适用于 UWP 平台的 Process 方法
@@ -18,9 +18,7 @@
 
   <ItemGroup>
 	<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-	<PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
 	<PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.22000.194" />
-	<PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

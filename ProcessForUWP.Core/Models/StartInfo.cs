@@ -56,7 +56,9 @@ namespace ProcessForUWP.Core.Models
                 ErrorDialogParentHandle = info.ErrorDialogParentHandle;
                 Verb = info.Verb;
                 WindowStyle = info.WindowStyle;
+#if NET46_OR_GREATER
                 PasswordInClearText = info.PasswordInClearText;
+#endif
             }
         }
 
@@ -80,7 +82,9 @@ namespace ProcessForUWP.Core.Models
                 ErrorDialogParentHandle = ErrorDialogParentHandle,
                 Verb = Verb,
                 WindowStyle = WindowStyle,
+#if NET46_OR_GREATER
                 PasswordInClearText = PasswordInClearText,
+#endif
                 StandardOutputEncoding = Encoding.UTF8
             };
         }
