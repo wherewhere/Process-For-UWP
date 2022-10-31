@@ -8,7 +8,7 @@ namespace ProcessForUWP.Core.Models
         public string Package { get; set; }
         public MessageType MessageType { get; set; }
 
-        private readonly JsonSerializerSettings jSetting = new JsonSerializerSettings
+        private readonly JsonSerializerSettings jSetting = new()
         {
             NullValueHandling = NullValueHandling.Ignore,
             DefaultValueHandling = DefaultValueHandling.Ignore,

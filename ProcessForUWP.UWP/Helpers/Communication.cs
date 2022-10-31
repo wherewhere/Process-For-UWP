@@ -23,7 +23,7 @@ namespace ProcessForUWP.UWP.Helpers
 
         private static int ID = 0;
         internal static int GetID => ID++;
-        private static readonly object locker = new object();
+        private static readonly object locker = new();
 
         internal static AppServiceConnection Connection;
         internal static BackgroundTaskDeferral AppServiceDeferral;
@@ -95,7 +95,7 @@ namespace ProcessForUWP.UWP.Helpers
             string json = JsonConvert.SerializeObject(value);
             try
             {
-                ValueSet message = new ValueSet() { { key, json } };
+                ValueSet message = new() { { key, json } };
                 _ = await Connection.SendMessageAsync(message);
             }
             catch (Exception ex)
@@ -195,7 +195,7 @@ namespace ProcessForUWP.UWP.Helpers
             }
             else
             {
-                CancellationTokenSource cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(s));
+                CancellationTokenSource cancellationToken = new(TimeSpan.FromSeconds(s));
                 try
                 {
                     Debug.WriteLine($"Warning!\nYou may initialize a process when the app is not Initialized.\nDo not do this or app will crash after {s}s if app still not Initialized.");
@@ -215,7 +215,7 @@ namespace ProcessForUWP.UWP.Helpers
 
         internal static (bool IsReceive, Message Received) Receive(string key, int id, MessageType? type = null)
         {
-            CancellationTokenSource cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            CancellationTokenSource cancellationToken = new(TimeSpan.FromSeconds(10));
             try
             {
                 wait:
@@ -225,7 +225,7 @@ namespace ProcessForUWP.UWP.Helpers
                 }
                 if (Received.Message != null && Received.Message.ContainsKey(key))
                 {
-                    if (Received.Message.TryGetValue(key, out var value))
+                    if (Received.Message.TryGetValue(key, out object value))
                     {
                         Message message = JsonConvert.DeserializeObject<Message>(value.ToString());
                         if (message.ID == id && (type == null || message.MessageType == type))

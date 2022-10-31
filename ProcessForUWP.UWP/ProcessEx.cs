@@ -61,8 +61,8 @@ namespace ProcessForUWP.UWP
         private StreamWriter ErrorStreamWriter;
         private StreamWriter OutputStreamWriter;
 
-        private readonly MemoryStream ErrorStream = new MemoryStream();
-        private readonly MemoryStream OutputStream = new MemoryStream();
+        private readonly MemoryStream ErrorStream = new();
+        private readonly MemoryStream OutputStream = new();
 
         /// <summary>
         /// Occurs when a process exits.
@@ -129,14 +129,7 @@ namespace ProcessForUWP.UWP
         private object PropertyGet(string Name)
         {
             (bool IsReceive, Message Received) = Communication.GetMessages("RemoteProcess", MessageType.PropertyGet, CommunicationID, Name, MessageType.PropertySet);
-            if (IsReceive)
-            {
-                return Received.GetPackage<object>();
-            }
-            else
-            {
-                throw new ArithmeticException("ProcessEx Unresponsive.");
-            }
+            return IsReceive ? Received.GetPackage<object>() : throw new ArithmeticException("ProcessEx Unresponsive.");
         }
 
         private void PropertySet(string Name, object value)
@@ -187,7 +180,7 @@ namespace ProcessForUWP.UWP
         /// <returns>A new ProcessForUWP.UWP.ProcessEx that is associated with the process resource, or null if no process resource is started. Note that a new process that’s started alongside already running instances of the same process will be independent from the others. In addition, ProcessStart may return a non-null ProcessEx with its ProcessForUWP.UWP.ProcessEx.HasExited property already set to true. In this case, the started process may have activated an existing instance of itself and then exited.</returns>
         public static new ProcessEx Start(ProcessStartInfo info)
         {
-            ProcessEx process = new ProcessEx() { StartInfo = info };
+            ProcessEx process = new() { StartInfo = info };
             process.Start();
             return process;
         }
@@ -330,7 +323,7 @@ namespace ProcessForUWP.UWP
         /// <returns>true if the associated process has exited; otherwise, false.</returns>
         public new bool WaitForExit(int milliseconds)
         {
-            CancellationTokenSource cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(milliseconds));
+            CancellationTokenSource cancellationToken = new(TimeSpan.FromSeconds(milliseconds));
             try
             {
                 while (!IsExited)

@@ -15,8 +15,8 @@ namespace ProcessForUWP.Desktop.Helpers
     /// </summary>
     public static class Communication
     {
-        private static readonly object locker = new object();
-        internal static List<RemoteProcess> Processes = new List<RemoteProcess>();
+        private static readonly object locker = new();
+        internal static List<RemoteProcess> Processes = new();
         internal static AppServiceConnection Connection;
 
         /// <summary>
@@ -46,13 +46,13 @@ namespace ProcessForUWP.Desktop.Helpers
                 Debug.WriteLine(ex);
             }
         }
-        
+
         internal static async void SendMessage(string key, object value)
         {
             string json = JsonConvert.SerializeObject(value);
             try
             {
-                ValueSet message = new ValueSet() { { key, json } };
+                ValueSet message = new() { { key, json } };
                 _ = await Connection.SendMessageAsync(message);
             }
             catch (Exception ex)

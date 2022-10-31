@@ -47,23 +47,24 @@ namespace ProcessForUWP.Demo
 
         private async Task<string> PickProcess()
         {
-            FileOpenPicker FileOpen = new FileOpenPicker();
+            FileOpenPicker FileOpen = new();
             FileOpen.FileTypeFilter.Add(".exe");
             FileOpen.SuggestedStartLocation = PickerLocationId.ComputerFolder;
 
             StorageFile file = await FileOpen.PickSingleFileAsync();
-            return file != null ? file.Path : null;
+            return file?.Path;
         }
 
         private TabViewItem CreateNewTab(int index, string path)
         {
-            TabViewItem newItem = new TabViewItem();
-
-            newItem.Header = $"ProcessEx {index}";
-            newItem.IconSource = new Microsoft.UI.Xaml.Controls.SymbolIconSource() { Symbol = Symbol.Document };
+            TabViewItem newItem = new()
+            {
+                Header = $"ProcessEx {index}",
+                IconSource = new Microsoft.UI.Xaml.Controls.SymbolIconSource() { Symbol = Symbol.Document }
+            };
 
             // The content of the tab is often a frame that contains a page, though it could be any UIElement.
-            Frame frame = new Frame();
+            Frame frame = new();
 
             frame.Navigate(typeof(TerminalPage), new TerminalViewModel(path));
 

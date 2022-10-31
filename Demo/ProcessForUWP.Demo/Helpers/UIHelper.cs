@@ -17,9 +17,9 @@ namespace ProcessForUWP.Demo.Helpers
         public static bool HasStatusBar => ApiInformation.IsTypePresent("Windows.UI.ViewManagement.StatusBar");
         public static double TitleBarHeight => HasTitleBar ? 28 : 32;
         public static double PageTitleHeight => HasTitleBar ? 48 : 48 + TitleBarHeight;
-        public static Thickness StackPanelMargin => new Thickness(0, PageTitleHeight, 0, 0);
-        public static Thickness ScrollViewerMargin => new Thickness(0, PageTitleHeight, 0, 0);
-        public static Thickness ScrollViewerPadding => new Thickness(0, -PageTitleHeight, 0, 0);
+        public static Thickness StackPanelMargin => new(0, PageTitleHeight, 0, 0);
+        public static Thickness ScrollViewerMargin => new(0, PageTitleHeight, 0, 0);
+        public static Thickness ScrollViewerPadding => new(0, -PageTitleHeight, 0, 0);
 
         private static CoreDispatcher shellDispatcher;
         public static CoreDispatcher ShellDispatcher
@@ -27,10 +27,7 @@ namespace ProcessForUWP.Demo.Helpers
             get => shellDispatcher;
             set
             {
-                if (shellDispatcher == null)
-                {
-                    shellDispatcher = value;
-                }
+                shellDispatcher ??= value;
             }
         }
 
@@ -75,7 +72,7 @@ namespace ProcessForUWP.Demo.Helpers
             {
                 index++;
                 size /= 1024;
-                if (size > 0.7 && size < 716.8) { break; }
+                if (size is > 0.7 and < 716.8) { break; }
                 else if (size >= 716.8) { continue; }
                 else if (size <= 0.7)
                 {

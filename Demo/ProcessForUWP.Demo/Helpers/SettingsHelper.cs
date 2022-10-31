@@ -40,9 +40,9 @@ namespace ProcessForUWP.Demo.Helpers
 
     internal static partial class SettingsHelper
     {
-        public static readonly UISettings UISettings = new UISettings();
+        public static readonly UISettings UISettings = new();
         public static OSVersion OperatingSystemVersion => SystemInformation.OperatingSystemVersion;
-        private static readonly LocalObjectStorageHelper LocalObject = new LocalObjectStorageHelper(new SystemTextJsonObjectSerializer());
+        private static readonly LocalObjectStorageHelper LocalObject = new(new SystemTextJsonObjectSerializer());
         public static ElementTheme Theme => Get<bool>("IsBackgroundColorFollowSystem") ? ElementTheme.Default : (Get<bool>("IsDarkMode") ? ElementTheme.Dark : ElementTheme.Light);
 
         static SettingsHelper()
@@ -57,7 +57,7 @@ namespace ProcessForUWP.Demo.Helpers
             {
                 bool value = sender.GetColorValue(UIColorType.Background) == Colors.Black;
                 Set(IsDarkMode, value);
-                _ = UIHelper.ShellDispatcher?.RunAsync(CoreDispatcherPriority.Normal, () => UIHelper.CheckTheme());
+                _ = UIHelper.ShellDispatcher?.RunAsync(CoreDispatcherPriority.Normal, UIHelper.CheckTheme);
             }
         }
     }
@@ -65,7 +65,7 @@ namespace ProcessForUWP.Demo.Helpers
     public class SystemTextJsonObjectSerializer : IObjectSerializer
     {
         // Specify your serialization settings
-        private readonly JsonSerializerSettings settings = new JsonSerializerSettings();
+        private readonly JsonSerializerSettings settings = new();
 
         string IObjectSerializer.Serialize<T>(T value) => JsonConvert.SerializeObject(value, typeof(T), Formatting.Indented, settings);
 

@@ -38,7 +38,7 @@ namespace ProcessForUWP.Demo.ViewModels
         {
             if (string.IsNullOrEmpty(OutputData))
             {
-                ProcessStartInfo info = new ProcessStartInfo
+                ProcessStartInfo info = new()
                 {
                     FileName = _path,
                     UseShellExecute = false,

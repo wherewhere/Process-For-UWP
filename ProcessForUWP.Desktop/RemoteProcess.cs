@@ -10,7 +10,7 @@ namespace ProcessForUWP.Desktop
 {
     internal class RemoteProcess : IDisposable
     {
-        internal readonly Process Process = new Process();
+        internal readonly Process Process = new();
         private readonly int CommunicationID = 0;
         private bool disposedValue;
 
