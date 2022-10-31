@@ -1,24 +1,21 @@
 ﻿namespace ProcessForUWP.Core.Models
 {
     /// <summary>
-    /// MessageType
+    /// The type of message
     /// </summary>
     public enum MessageType
     {
-        Kill,
-        Start,
-        Close,
-        Exited,
-        Refresh,
-        Dispose,
+        Method,
         Message,
-        CopyFile,
-        ErrorData,
-        NewProcess,
-        OutputData,
         PropertyGet,
         PropertySet,
-        BeginErrorReadLine,
-        BeginOutputReadLine,
+
+        NewProcess,
+        ProcessStart,
+        ProcessExited,
+        ProcessErrorData,
+        ProcessOutputData,
+
+        CopyFile,
     }
 }

@@ -28,9 +28,6 @@ namespace ProcessForUWP.Demo
         {
             InitializeComponent();
             Suspending += OnSuspending;
-
-            EnteredBackground += App_EnteredBackground;
-            LeavingBackground += App_LeavingBackground;
         }
 
         /// <summary>
@@ -38,9 +35,9 @@ namespace ProcessForUWP.Demo
         /// 将在启动应用程序以打开特定文件等情况下使用。
         /// </summary>
         /// <param name="e">有关启动请求和过程的详细信息。</param>
-        protected override async void OnLaunched(LaunchActivatedEventArgs e)
+        protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-            await InitializeConnection();
+            Communication.InitializeAppServiceConnection();
 
             Frame rootFrame = Window.Current.Content as Frame;
 
@@ -76,42 +73,6 @@ namespace ProcessForUWP.Demo
             }
         }
 
-        private async Task InitializeConnection()
-        {
-            if (Connection == null)
-            {
-                if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
-                {
-                    try
-                    {
-                        await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
-                        AppServiceConnected += (sender, e) =>
-                        {
-                            Connection.RequestReceived += ProcessHelper.Connection_RequestReceived;
-                            ProcessHelper.SendMessage = (value) =>
-                            {
-                                string json = JsonConvert.SerializeObject(value);
-                                try
-                                {
-                                    ValueSet message = new ValueSet() { { "UWP", json } };
-                                    _ = Connection.SendMessageAsync(message);
-                                }
-                                catch (Exception ex)
-                                {
-                                    Debug.WriteLine(ex);
-                                    Debug.WriteLine(json);
-                                }
-                            };
-                        };
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex);
-                    }
-                }
-            }
-        }
-
         /// <summary>
         /// 导航到特定页失败时调用
         /// </summary>
@@ -136,53 +97,15 @@ namespace ProcessForUWP.Demo
             deferral.Complete();
         }
 
-        public static BackgroundTaskDeferral AppServiceDeferral = null;
-        public static AppServiceConnection Connection = null;
-        public static event EventHandler AppServiceDisconnected;
-        public static event EventHandler<AppServiceTriggerDetails> AppServiceConnected;
-        public static bool IsForeground = false;
-
-        private void App_LeavingBackground(object sender, LeavingBackgroundEventArgs e)
-        {
-            IsForeground = true;
-        }
-
-        private void App_EnteredBackground(object sender, EnteredBackgroundEventArgs e)
-        {
-            IsForeground = false;
-        }
 
         /// <summary>
         /// Handles connection requests to the app service
         /// </summary>
+        /// <param name="args">Data about the background activation.</param>
         protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)
         {
             base.OnBackgroundActivated(args);
-
-            if (args.TaskInstance.TriggerDetails is AppServiceTriggerDetails details)
-            {
-                // only accept connections from callers in the same package
-                if (details.CallerPackageFamilyName == Package.Current.Id.FamilyName)
-                {
-                    // connection established from the fulltrust process
-                    AppServiceDeferral = args.TaskInstance.GetDeferral();
-                    args.TaskInstance.Canceled += OnTaskCanceled;
-
-                    Connection = details.AppServiceConnection;
-                    AppServiceConnected?.Invoke(this, args.TaskInstance.TriggerDetails as AppServiceTriggerDetails);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Task canceled here means the app service client is gone
-        /// </summary>
-        private void OnTaskCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason)
-        {
-            AppServiceDeferral?.Complete();
-            AppServiceDeferral = null;
-            Connection = null;
-            AppServiceDisconnected?.Invoke(this, null);
+            Communication.OnBackgroundActivated(args);
         }
     }
 }

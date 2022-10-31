@@ -10,38 +10,38 @@ using Windows.ApplicationModel.AppService;
 namespace ProcessForUWP.UWP
 {
     /// <summary>
-    /// Provides data for the ProcessForUWP.UWP.Process.OutputDataReceived and ProcessForUWP.UWP.Process.ErrorDataReceived events.
+    /// Provides data for the <see cref="ProcessEx.OutputDataReceived"/> and <see cref="ProcessEx.ErrorDataReceived"/> events.
     /// </summary>
-    public class DataReceivedEventArgs : EventArgs
+    public class DataReceivedEventArgsEx : EventArgs
     {
         /// <summary>
-        /// Gets the line of characters that was written to a redirected ProcessForUWP.UWP.Process output stream.
+        /// Gets the line of characters that was written to a redirected <see cref="ProcessEx"/> output stream.
         /// </summary>
         public string Data;
 
         /// <summary>
-        /// Initializes a new instance of the ProcessForUWP.UWP.DataReceivedEventArgs class.
+        /// Initializes a new instance of the <see cref="DataReceivedEventArgsEx"/> class.
         /// </summary>
         /// <param name="data"></param>
-        public DataReceivedEventArgs(string data)
+        public DataReceivedEventArgsEx(string data)
         {
             Data = data;
         }
     }
 
     /// <summary>
-    /// Represents the method that will handle the ProcessForUWP.UWP.Process.OutputDataReceived event or ProcessForUWP.UWP.Process.ErrorDataReceived event of a ProcessForUWP.UWP.Process.
+    /// Represents the method that will handle the <see cref="ProcessEx.OutputDataReceived"/> event or <see cref="ProcessEx.ErrorDataReceived"/> event of a ProcessForUWP.UWP.ProcessEx.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
-    /// <param name="e">A ProcessForUWP.UWP.DataReceivedEventArgs that contains the event data.</param>
-    public delegate void DataReceivedEventHandler(Process sender, DataReceivedEventArgs e);
+    /// <param name="e">A <see cref="DataReceivedEventArgsEx"/> that contains the event data.</param>
+    public delegate void DataReceivedEventHandlerEx(ProcessEx sender, DataReceivedEventArgsEx e);
 
     /// <summary>
     /// Provides access to local and remote processes and enables you to start and stop local system processes.
     /// </summary>
-    public class Process : System.Diagnostics.Process
+    public class ProcessEx : Process
     {
-        private readonly int CommunicationID = ProcessHelper.GetID;
+        private readonly int CommunicationID = Communication.GetID;
 
         /// <summary>
         /// Gets a stream used to read the error output of the application.
@@ -70,14 +70,14 @@ namespace ProcessForUWP.UWP
         public new event EventHandler Exited;
 
         /// <summary>
-        /// Occurs when an application writes to its redirected System.Diagnostics.Process.StandardError stream.
+        /// Occurs when an application writes to its redirected System.Diagnostics.ProcessEx.StandardError stream.
         /// </summary>
-        public new event DataReceivedEventHandler ErrorDataReceived;
+        public new event DataReceivedEventHandlerEx ErrorDataReceived;
 
         /// <summary>
-        /// Occurs each time an application writes a line to its redirected System.Diagnostics.Process.StandardOutput stream.
+        /// Occurs each time an application writes a line to its redirected System.Diagnostics.ProcessEx.StandardOutput stream.
         /// </summary>
-        public new event DataReceivedEventHandler OutputDataReceived;
+        public new event DataReceivedEventHandlerEx OutputDataReceived;
 
         /// <summary>
         /// Gets the unique identifier for the associated process.
@@ -109,44 +109,52 @@ namespace ProcessForUWP.UWP
         /// </summary>
         public bool IsExited;
 
+        private int basePriority;
         /// <summary>
         /// Gets the base priority of the associated process.
         /// </summary>
         public new int BasePriority
         {
-            get => BasePriority;
-            set => PropertySet("BasePriority", value);
+            get => basePriority;
+            set
+            {
+                if (basePriority != value)
+                {
+                    PropertySet("BasePriority", value);
+                    basePriority = value;
+                }
+            }
         }
 
         private object PropertyGet(string Name)
         {
-            (bool IsReceive, Message Received) = ProcessHelper.GetMessages(MessageType.PropertyGet, CommunicationID, Name, MessageType.PropertySet);
+            (bool IsReceive, Message Received) = Communication.GetMessages("RemoteProcess", MessageType.PropertyGet, CommunicationID, Name, MessageType.PropertySet);
             if (IsReceive)
             {
                 return Received.GetPackage<object>();
             }
             else
             {
-                throw new ArithmeticException("Process Unresponsive.");
+                throw new ArithmeticException("ProcessEx Unresponsive.");
             }
         }
 
         private void PropertySet(string Name, object value)
         {
-            ProcessHelper.Received.IsReceived = false;
-            ProcessHelper.SendMessages(MessageType.PropertySet, CommunicationID, (Name, value));
+            Communication.Received.IsReceived = false;
+            Communication.SendMessages("RemoteProcess", MessageType.PropertySet, CommunicationID, (Name, value));
         }
 
         /// <summary>
-        /// Initializes a new instance of the ProcessForUWP.UWP.Process class.
+        /// Initializes a new instance of the ProcessForUWP.UWP.ProcessEx class.
         /// </summary>
         /// <param name="s">The amount of time, in seconds, to wait for instance process.</param>
         /// <exception cref="InvalidOperationException">Initializes process failed.</exception>
-        public Process(double s = 10)
+        public ProcessEx(double s = 10)
         {
-            if (!ProcessHelper.IsInitialized(s)) { throw new InvalidOperationException("Have not initialized process yet."); }
-            ProcessHelper.RequestReceived += Connection_RequestReceived;
-            (bool IsReceive, Message Received) = ProcessHelper.GetMessages(MessageType.NewProcess, CommunicationID, MessageType.Message);
+            if (!Communication.IsInitialized(s)) { throw new InvalidOperationException("Have not initialized process yet."); }
+            Communication.RequestReceived += Connection_RequestReceived;
+            (bool IsReceive, Message Received) = Communication.GetMessages(nameof(Communication), MessageType.NewProcess, CommunicationID, MessageType.Message);
             if (!IsReceive || Received?.GetPackage<StatuesType>() != StatuesType.Success)
             {
                 throw new InvalidOperationException("Cannot initializes process.");
@@ -154,7 +162,7 @@ namespace ProcessForUWP.UWP
         }
 
         /// <summary>
-        /// Starts (or reuses) the process resource that is specified by the ProcessForUWP.UWP.Process.StartInfo property of this ProcessForUWP.UWP.Process component and associates it with the component.
+        /// Starts (or reuses) the process resource that is specified by the ProcessForUWP.UWP.ProcessEx.StartInfo property of this ProcessForUWP.UWP.ProcessEx component and associates it with the component.
         /// </summary>
         public new void Start()
         {
@@ -169,17 +177,17 @@ namespace ProcessForUWP.UWP
                 StandardOutput = new StreamReader(OutputStream);
                 OutputStreamWriter = new StreamWriter(OutputStream);
             }
-            ProcessHelper.SendMessages(MessageType.Start, CommunicationID, new StartInfo(StartInfo));
+            Communication.SendMessages("RemoteProcess", MessageType.ProcessStart, CommunicationID, new StartInfo(StartInfo));
         }
 
         /// <summary>
-        /// Starts the process resource that is specified by the parameter containing process start information (for example, the file name of the process to start) and associates the resource with a new ProcessForUWP.UWP.Process component.
+        /// Starts the process resource that is specified by the parameter containing process start information (for example, the file name of the process to start) and associates the resource with a new ProcessForUWP.UWP.ProcessEx component.
         /// </summary>
         /// <param name="info">The System.Diagnostics.ProcessStartInfo that contains the information that is used to start the process, including the file name and any command-line arguments.</param>
-        /// <returns>A new ProcessForUWP.UWP.Process that is associated with the process resource, or null if no process resource is started. Note that a new process that’s started alongside already running instances of the same process will be independent from the others. In addition, Start may return a non-null Process with its ProcessForUWP.UWP.Process.HasExited property already set to true. In this case, the started process may have activated an existing instance of itself and then exited.</returns>
-        public static new Process Start(ProcessStartInfo info)
+        /// <returns>A new ProcessForUWP.UWP.ProcessEx that is associated with the process resource, or null if no process resource is started. Note that a new process that’s started alongside already running instances of the same process will be independent from the others. In addition, ProcessStart may return a non-null ProcessEx with its ProcessForUWP.UWP.ProcessEx.HasExited property already set to true. In this case, the started process may have activated an existing instance of itself and then exited.</returns>
+        public static new ProcessEx Start(ProcessStartInfo info)
         {
-            Process process = new Process() { StartInfo = info };
+            ProcessEx process = new ProcessEx() { StartInfo = info };
             process.Start();
             return process;
         }
@@ -189,23 +197,23 @@ namespace ProcessForUWP.UWP
         /// </summary>
         public new void Refresh()
         {
-            ProcessHelper.SendMessages(MessageType.Refresh, CommunicationID);
+            Communication.SendMessages("RemoteProcess", MessageType.Method, CommunicationID, nameof(Refresh));
         }
 
         /// <summary>
-        /// Begins asynchronous read operations on the redirected ProcessForUWP.UWP.Process.StandardError stream of the application.
+        /// Begins asynchronous read operations on the redirected ProcessForUWP.UWP.ProcessEx.StandardError stream of the application.
         /// </summary>
         public new void BeginErrorReadLine()
         {
-            ProcessHelper.SendMessages(MessageType.BeginErrorReadLine, CommunicationID);
+            Communication.SendMessages("RemoteProcess", MessageType.Method, CommunicationID, nameof(BeginErrorReadLine));
         }
 
         /// <summary>
-        /// Begins asynchronous read operations on the redirected ProcessForUWP.UWP.Process.StandardOutput stream of the application.
+        /// Begins asynchronous read operations on the redirected ProcessForUWP.UWP.ProcessEx.StandardOutput stream of the application.
         /// </summary>
         public new void BeginOutputReadLine()
         {
-            ProcessHelper.SendMessages(MessageType.BeginOutputReadLine, CommunicationID);
+            Communication.SendMessages("RemoteProcess", MessageType.Method, CommunicationID, nameof(BeginOutputReadLine));
         }
 
         /// <summary>
@@ -213,8 +221,8 @@ namespace ProcessForUWP.UWP
         /// </summary>
         public new void Close()
         {
-            ProcessHelper.SendMessages(MessageType.Close, CommunicationID);
-            ProcessHelper.RequestReceived -= Connection_RequestReceived;
+            Communication.SendMessages("RemoteProcess", MessageType.Method, CommunicationID, nameof(Close));
+            Communication.RequestReceived -= Connection_RequestReceived;
             OutputStreamWriter?.Dispose();
             ErrorStreamWriter?.Dispose();
             StandardOutput?.Dispose();
@@ -230,8 +238,8 @@ namespace ProcessForUWP.UWP
         /// </summary>
         public new void Dispose()
         {
-            ProcessHelper.SendMessages(MessageType.Dispose, CommunicationID);
-            ProcessHelper.RequestReceived -= Connection_RequestReceived;
+            Communication.SendMessages("RemoteProcess", MessageType.Method, CommunicationID, nameof(Dispose));
+            Communication.RequestReceived -= Connection_RequestReceived;
             OutputStreamWriter?.Dispose();
             ErrorStreamWriter?.Dispose();
             StandardOutput?.Dispose();
@@ -248,8 +256,8 @@ namespace ProcessForUWP.UWP
         /// </summary>
         public new void Kill()
         {
-            ProcessHelper.SendMessages(MessageType.Kill, CommunicationID);
-            ProcessHelper.RequestReceived -= Connection_RequestReceived;
+            Communication.SendMessages("RemoteProcess", MessageType.Method, CommunicationID, nameof(Kill));
+            Communication.RequestReceived -= Connection_RequestReceived;
             OutputStreamWriter?.Dispose();
             ErrorStreamWriter?.Dispose();
             StandardOutput?.Dispose();
@@ -264,32 +272,35 @@ namespace ProcessForUWP.UWP
         {
             try
             {
-                Message msg = JsonConvert.DeserializeObject<Message>(args.Request.Message["Desktop"] as string);
-                if (msg.ID == CommunicationID)
+                if (args.Request.Message.ContainsKey(nameof(ProcessEx)))
                 {
-                    if (msg.MessageType == MessageType.Exited)
+                    Message message = JsonConvert.DeserializeObject<Message>(args.Request.Message[nameof(ProcessEx)] as string);
+                    if (message.ID == CommunicationID)
                     {
-                        IsExited = true;
-                        Exited?.Invoke(this, new EventArgs());
-                    }
-                    else if (msg.MessageType == MessageType.ErrorData)
-                    {
-                        string line = msg.GetPackage<string>();
-                        ErrorDataReceived?.Invoke(this, new DataReceivedEventArgs(line));
-                        if (StartInfo.RedirectStandardError)
+                        if (message.MessageType == MessageType.ProcessExited)
                         {
-                            ErrorStreamWriter.WriteLine(line);
-                            ErrorStreamWriter.Flush();
+                            IsExited = true;
+                            Exited?.Invoke(this, new EventArgs());
                         }
-                    }
-                    else if (msg.MessageType == MessageType.OutputData)
-                    {
-                        string line = msg.GetPackage<string>();
-                        OutputDataReceived?.Invoke(this, new DataReceivedEventArgs(line));
-                        if (StartInfo.RedirectStandardOutput)
+                        else if (message.MessageType == MessageType.ProcessErrorData)
                         {
-                            OutputStreamWriter.WriteLine(line);
-                            OutputStreamWriter.Flush();
+                            string line = message.GetPackage<string>();
+                            ErrorDataReceived?.Invoke(this, new DataReceivedEventArgsEx(line));
+                            if (StartInfo.RedirectStandardError)
+                            {
+                                ErrorStreamWriter.WriteLine(line);
+                                ErrorStreamWriter.Flush();
+                            }
+                        }
+                        else if (message.MessageType == MessageType.ProcessOutputData)
+                        {
+                            string line = message.GetPackage<string>();
+                            OutputDataReceived?.Invoke(this, new DataReceivedEventArgsEx(line));
+                            if (StartInfo.RedirectStandardOutput)
+                            {
+                                OutputStreamWriter.WriteLine(line);
+                                OutputStreamWriter.Flush();
+                            }
                         }
                     }
                 }
@@ -301,7 +312,7 @@ namespace ProcessForUWP.UWP
         }
 
         /// <summary>
-        /// Instructs the System.Diagnostics.Process component to wait indefinitely for the associated process to exit.
+        /// Instructs the System.Diagnostics.ProcessEx component to wait indefinitely for the associated process to exit.
         /// </summary>
         public new void WaitForExit()
         {
@@ -312,7 +323,7 @@ namespace ProcessForUWP.UWP
         }
 
         /// <summary>
-        /// Instructs the System.Diagnostics.Process component to wait the specified number of milliseconds for the associated process to exit.
+        /// Instructs the System.Diagnostics.ProcessEx component to wait the specified number of milliseconds for the associated process to exit.
         /// </summary>
         /// <param name="milliseconds">The amount of time, in milliseconds, to wait for the associated process to exit.
         /// The maximum is the largest possible value of a 32-bit integer, which represents infinity to the operating system.</param>

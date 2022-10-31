@@ -9,7 +9,7 @@ namespace ProcessForUWP.Demo.ViewModels
     public class TerminalViewModel : INotifyPropertyChanged
     {
         private readonly string _path;
-        private UWP.Process _process;
+        private UWP.ProcessEx _process;
 
         private string _outputData = string.Empty;
         public string OutputData
@@ -46,7 +46,7 @@ namespace ProcessForUWP.Demo.ViewModels
                     RedirectStandardOutput = true,
                     CreateNoWindow = true
                 };
-                _process = await Task.Run(() => { return new UWP.Process { StartInfo = info }; });
+                _process = await Task.Run(() => { return new UWP.ProcessEx { StartInfo = info }; });
                 _process.Start();
                 _process.BeginErrorReadLine();
                 _process.BeginOutputReadLine();
@@ -61,7 +61,7 @@ namespace ProcessForUWP.Demo.ViewModels
             }
         }
 
-        private void OnOutputDataReceived(UWP.Process sender, UWP.DataReceivedEventArgs e)
+        private void OnOutputDataReceived(UWP.ProcessEx sender, UWP.DataReceivedEventArgsEx e)
         {
             _ = UIHelper.ShellDispatcher.RunAsync(CoreDispatcherPriority.Normal, () => OutputData += $"{e.Data}\n");
         }

@@ -46,13 +46,13 @@ namespace ProcessForUWP.Desktop.Helpers
                 Debug.WriteLine(ex);
             }
         }
-
-        internal static async void SendMessage(object value)
+        
+        internal static async void SendMessage(string key, object value)
         {
             string json = JsonConvert.SerializeObject(value);
             try
             {
-                ValueSet message = new ValueSet() { { $"Desktop", json } };
+                ValueSet message = new ValueSet() { { key, json } };
                 _ = await Connection.SendMessageAsync(message);
             }
             catch (Exception ex)
@@ -62,35 +62,35 @@ namespace ProcessForUWP.Desktop.Helpers
             }
         }
 
-        internal static void SendMessages(MessageType typeEnum)
+        internal static void SendMessages(string key, MessageType typeEnum)
         {
             lock (locker)
             {
-                SendMessage(Message.MakeMessage(typeEnum));
+                SendMessage(key, Message.MakeMessage(typeEnum));
             }
         }
 
-        internal static void SendMessages(MessageType typeEnum, int id)
+        internal static void SendMessages(string key, MessageType typeEnum, int id)
         {
             lock (locker)
             {
-                SendMessage(Message.MakeMessage(typeEnum, id));
+                SendMessage(key, Message.MakeMessage(typeEnum, id));
             }
         }
 
-        internal static void SendMessages(MessageType typeEnum, object message)
+        internal static void SendMessages(string key, MessageType typeEnum, object message)
         {
             lock (locker)
             {
-                SendMessage(Message.MakeMessage(typeEnum, 0, message));
+                SendMessage(key, Message.MakeMessage(typeEnum, 0, message));
             }
         }
 
-        internal static void SendMessages(MessageType typeEnum, int id, object message)
+        internal static void SendMessages(string key, MessageType typeEnum, int id, object message)
         {
             lock (locker)
             {
-                SendMessage(Message.MakeMessage(typeEnum, id, message));
+                SendMessage(key, Message.MakeMessage(typeEnum, id, message));
             }
         }
 
@@ -98,25 +98,28 @@ namespace ProcessForUWP.Desktop.Helpers
         {
             try
             {
-                Message msg = JsonConvert.DeserializeObject<Message>(args.Request.Message["UWP"] as string);
-                switch (msg.MessageType)
+                if (args.Request.Message.ContainsKey(nameof(Communication)))
                 {
-                    case MessageType.NewProcess:
-                        Processes.Add(new RemoteProcess(msg.ID));
-                        SendMessages(MessageType.Message, msg.ID, StatuesType.Success);
-                        break;
-                    case MessageType.CopyFile:
-                        try
-                        {
-                            (string sourceFileName, string destFileName, bool overwrite) = msg.GetPackage<(string, string, bool)>();
-                            File.Copy(sourceFileName, destFileName, overwrite);
-                            SendMessages(MessageType.CopyFile, msg.ID, StatuesType.Success);
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine(ex.Message);
-                        }
-                        break;
+                    Message message = JsonConvert.DeserializeObject<Message>(args.Request.Message[nameof(Communication)] as string);
+                    switch (message.MessageType)
+                    {
+                        case MessageType.NewProcess:
+                            Processes.Add(new RemoteProcess(message.ID));
+                            SendMessages(nameof(Communication), MessageType.Message, message.ID, StatuesType.Success);
+                            break;
+                        case MessageType.CopyFile:
+                            try
+                            {
+                                (string sourceFileName, string destFileName, bool overwrite) = message.GetPackage<(string, string, bool)>();
+                                File.Copy(sourceFileName, destFileName, overwrite);
+                                SendMessages(nameof(Communication), MessageType.CopyFile, message.ID, StatuesType.Success);
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.Message);
+                            }
+                            break;
+                    }
                 }
             }
             catch (Exception ex)

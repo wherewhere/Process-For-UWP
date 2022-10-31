@@ -33,56 +33,44 @@ namespace ProcessForUWP.Desktop
         {
             try
             {
-                Message msg = JsonConvert.DeserializeObject<Message>(args.Request.Message["UWP"] as string);
-                if (msg.ID == CommunicationID)
+                if (args.Request.Message.ContainsKey(nameof(RemoteProcess)))
                 {
-                    switch (msg.MessageType)
+                    Message message = JsonConvert.DeserializeObject<Message>(args.Request.Message[nameof(RemoteProcess)] as string);
+                    if (message.ID == CommunicationID)
                     {
-                        case MessageType.Kill:
-                            Process.Kill();
-                            break;
-                        case MessageType.Start:
-                            ProcessStartInfo info = msg.GetPackage<StartInfo>().GetStartInfo();
-                            Process.StartInfo = info;
-                            Process.Start();
-                            break;
-                        case MessageType.Close:
-                            Process.Close();
-                            break;
-                        case MessageType.Refresh:
-                            Process.Refresh();
-                            break;
-                        case MessageType.Dispose:
-                            Process.Dispose();
-                            break;
-                        case MessageType.PropertyGet:
-                            try
-                            {
-                                object value = Process.GetProperty(msg.GetPackage<string>());
-                                Communication.SendMessages(MessageType.PropertySet, msg.ID, value);
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.Write(ex);
-                            }
-                            break;
-                        case MessageType.PropertySet:
-                            try
-                            {
-                                (string name, object value) = msg.GetPackage<(string, object)>();
-                                Process.SetProperty(name, value);
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.Write(ex);
-                            }
-                            break;
-                        case MessageType.BeginErrorReadLine:
-                            Process.BeginErrorReadLine();
-                            break;
-                        case MessageType.BeginOutputReadLine:
-                            Process.BeginOutputReadLine();
-                            break;
+                        switch (message.MessageType)
+                        {
+                            case MessageType.Method:
+                                Process.InvokeMethod(message.GetPackage<string>());
+                                break;
+                            case MessageType.PropertyGet:
+                                try
+                                {
+                                    object value = Process.GetProperty(message.GetPackage<string>());
+                                    Communication.SendMessages(nameof(RemoteProcess), MessageType.PropertySet, message.ID, value);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.Write(ex);
+                                }
+                                break;
+                            case MessageType.PropertySet:
+                                try
+                                {
+                                    (string name, object value) = message.GetPackage<(string, object)>();
+                                    Process.SetProperty(name, value);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.Write(ex);
+                                }
+                                break;
+                            case MessageType.ProcessStart:
+                                ProcessStartInfo info = message.GetPackage<StartInfo>().GetStartInfo();
+                                Process.StartInfo = info;
+                                Process.Start();
+                                break;
+                        }
                     }
                 }
             }
@@ -94,19 +82,19 @@ namespace ProcessForUWP.Desktop
 
         private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
-            Communication.SendMessages(MessageType.ErrorData, CommunicationID, e.Data);
+            Communication.SendMessages("ProcessEx", MessageType.ProcessErrorData, CommunicationID, e.Data);
         }
 
         private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            Communication.SendMessages(MessageType.OutputData, CommunicationID, e.Data);
+            Communication.SendMessages("ProcessEx", MessageType.ProcessOutputData, CommunicationID, e.Data);
         }
 
         private void Process_Exited(object sender, EventArgs e)
         {
             Process.OutputDataReceived -= Process_OutputDataReceived;
             Process.ErrorDataReceived -= Process_ErrorDataReceived;
-            Communication.SendMessages(MessageType.Exited);
+            Communication.SendMessages("ProcessEx", MessageType.ProcessExited);
             Process.Exited -= Process_Exited;
         }
 

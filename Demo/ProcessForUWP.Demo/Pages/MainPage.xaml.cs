@@ -59,7 +59,7 @@ namespace ProcessForUWP.Demo
         {
             TabViewItem newItem = new TabViewItem();
 
-            newItem.Header = $"Process {index}";
+            newItem.Header = $"ProcessEx {index}";
             newItem.IconSource = new Microsoft.UI.Xaml.Controls.SymbolIconSource() { Symbol = Symbol.Document };
 
             // The content of the tab is often a frame that contains a page, though it could be any UIElement.
