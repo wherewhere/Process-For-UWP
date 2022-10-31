@@ -25,4 +25,8 @@
     <ProjectReference Include="..\ProcessForUWP.Core\ProcessForUWP.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="Microsoft.Windows.SDK.Contracts" Version="10.0.22621.755" />
+  </ItemGroup>
+
 </Project>
