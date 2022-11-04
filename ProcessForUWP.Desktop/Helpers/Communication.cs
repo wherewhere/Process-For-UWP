@@ -4,20 +4,28 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.AppService;
+using Windows.Foundation;
 using Windows.Foundation.Collections;
 
 namespace ProcessForUWP.Desktop.Helpers
 {
     /// <summary>
-    /// Communication Helpers for RemoteProcess.
+    /// Communication Helpers for ProcessEx.
     /// </summary>
     public static class Communication
     {
         private static readonly object locker = new();
-        internal static List<RemoteProcess> Processes = new();
+        internal static List<ProcessEx> Processes = new();
         internal static AppServiceConnection Connection;
+        internal static event TypedEventHandler<AppServiceConnection, AppServiceRequestReceivedEventArgs> RequestReceived;
+
+        static Communication()
+        {
+            FileEx.Initialize();
+        }
 
         /// <summary>
         /// Initialize Communication.
@@ -38,7 +46,8 @@ namespace ProcessForUWP.Desktop.Helpers
                 if (status != AppServiceConnectionStatus.Success)
                 {
                     // something went wrong ...
-                    Console.WriteLine(status.ToString());
+                    Debug.WriteLine(status.ToString());
+                    Environment.Exit(0);
                 }
             }
             catch (Exception ex)
@@ -52,8 +61,11 @@ namespace ProcessForUWP.Desktop.Helpers
             string json = JsonConvert.SerializeObject(value);
             try
             {
-                ValueSet message = new() { { key, json } };
-                _ = await Connection.SendMessageAsync(message);
+                if (IsInitialized())
+                {
+                    ValueSet message = new() { { key, json } };
+                    _ = await Connection?.SendMessageAsync(message);
+                }
             }
             catch (Exception ex)
             {
@@ -96,6 +108,7 @@ namespace ProcessForUWP.Desktop.Helpers
 
         private static void Connection_RequestReceived(AppServiceConnection sender, AppServiceRequestReceivedEventArgs args)
         {
+            RequestReceived?.Invoke(sender, args);
             try
             {
                 if (args.Request.Message.ContainsKey(nameof(Communication)))
@@ -104,20 +117,8 @@ namespace ProcessForUWP.Desktop.Helpers
                     switch (message.MessageType)
                     {
                         case MessageType.NewProcess:
-                            Processes.Add(new RemoteProcess(message.ID));
+                            Processes.Add(new ProcessEx(message.ID));
                             SendMessages(nameof(Communication), MessageType.Message, message.ID, StatuesType.Success);
-                            break;
-                        case MessageType.CopyFile:
-                            try
-                            {
-                                (string sourceFileName, string destFileName, bool overwrite) = message.GetPackage<(string, string, bool)>();
-                                File.Copy(sourceFileName, destFileName, overwrite);
-                                SendMessages(nameof(Communication), MessageType.CopyFile, message.ID, StatuesType.Success);
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine(ex.Message);
-                            }
                             break;
                     }
                 }
@@ -128,12 +129,38 @@ namespace ProcessForUWP.Desktop.Helpers
             }
         }
 
+        internal static bool IsInitialized(double s = 10)
+        {
+            if (Connection != null)
+            {
+                return true;
+            }
+            else
+            {
+                CancellationTokenSource cancellationToken = new(TimeSpan.FromSeconds(s));
+                try
+                {
+                    Debug.WriteLine($"Warning!\nYou may initialize a process when the app is not Initialized.\nDo not do this or app will crash after {s}s if app still not Initialized.");
+                    while (SendMessage == null)
+                    {
+                        cancellationToken.Token.ThrowIfCancellationRequested();
+                    }
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                    return false;
+                }
+            }
+        }
+
         /// <summary>
         /// Kill all processes which have created.
         /// </summary>
         public static void KillAllProcesses()
         {
-            foreach (RemoteProcess Process in Processes)
+            foreach (ProcessEx Process in Processes)
             {
                 if (!Process.Process.HasExited)
                 {

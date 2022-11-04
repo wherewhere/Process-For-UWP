@@ -29,9 +29,9 @@ namespace ProcessForUWP.UWP.Helpers
         internal static BackgroundTaskDeferral AppServiceDeferral;
         internal static event EventHandler AppServiceDisconnected;
         internal static event EventHandler<AppServiceTriggerDetails> AppServiceConnected;
+        internal static event TypedEventHandler<AppServiceConnection, AppServiceRequestReceivedEventArgs> RequestReceived;
 
         internal static (bool IsReceived, ValueSet Message) Received;
-        internal static event TypedEventHandler<AppServiceConnection, AppServiceRequestReceivedEventArgs> RequestReceived;
 
         static Communication()
         {
@@ -95,8 +95,11 @@ namespace ProcessForUWP.UWP.Helpers
             string json = JsonConvert.SerializeObject(value);
             try
             {
-                ValueSet message = new() { { key, json } };
-                _ = await Connection.SendMessageAsync(message);
+                if (IsInitialized())
+                {
+                    ValueSet message = new() { { key, json } };
+                    _ = await Connection?.SendMessageAsync(message);
+                }
             }
             catch (Exception ex)
             {
@@ -172,7 +175,6 @@ namespace ProcessForUWP.UWP.Helpers
         /// <param name="args"></param>
         public static void Connection_RequestReceived(AppServiceConnection sender, AppServiceRequestReceivedEventArgs args)
         {
-            RequestReceived?.Invoke(sender, args);
             try
             {
                 if (!Received.IsReceived)
@@ -185,11 +187,12 @@ namespace ProcessForUWP.UWP.Helpers
             {
                 Debug.WriteLine(ex);
             }
+            RequestReceived?.Invoke(sender, args);
         }
 
         internal static bool IsInitialized(double s = 10)
         {
-            if (SendMessage != null)
+            if (Connection != null)
             {
                 return true;
             }
@@ -245,30 +248,6 @@ namespace ProcessForUWP.UWP.Helpers
             finally
             {
                 Received.IsReceived = false;
-            }
-        }
-
-        /// <summary>
-        /// Copy File through Delegate.
-        /// </summary>
-        /// <param name="sourceFileName"></param>
-        /// <param name="destFileName"></param>
-        /// <param name="overwrite"></param>
-        /// <exception cref="FieldAccessException">Cannot copy this file.</exception>
-        public static void CopyFile(string sourceFileName, string destFileName, bool overwrite)
-        {
-            SendMessages(nameof(Communication), MessageType.CopyFile, (sourceFileName, destFileName, overwrite));
-            try
-            {
-                (bool iscopyed, Message message) = Receive(nameof(Communication), 0, MessageType.CopyFile);
-                if (!(iscopyed && message.GetPackage<StatuesType>() == StatuesType.Success))
-                {
-                    throw new Exception("Cannot copy this file.");
-                }
-            }
-            catch (Exception)
-            {
-                throw new FieldAccessException("Cannot copy this file.");
             }
         }
     }

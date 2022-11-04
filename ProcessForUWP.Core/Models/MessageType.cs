@@ -17,5 +17,6 @@
         ProcessOutputData,
 
         CopyFile,
+        FileExists,
     }
 }

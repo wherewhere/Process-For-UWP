@@ -128,14 +128,14 @@ namespace ProcessForUWP.UWP
 
         private object PropertyGet(string Name)
         {
-            (bool IsReceive, Message Received) = Communication.GetMessages("RemoteProcess", MessageType.PropertyGet, CommunicationID, Name, MessageType.PropertySet);
+            (bool IsReceive, Message Received) = Communication.GetMessages(nameof(ProcessEx), MessageType.PropertyGet, CommunicationID, Name, MessageType.PropertySet);
             return IsReceive ? Received.GetPackage<object>() : throw new ArithmeticException("ProcessEx Unresponsive.");
         }
 
         private void PropertySet(string Name, object value)
         {
             Communication.Received.IsReceived = false;
-            Communication.SendMessages("RemoteProcess", MessageType.PropertySet, CommunicationID, (Name, value));
+            Communication.SendMessages(nameof(ProcessEx), MessageType.PropertySet, CommunicationID, (Name, value));
         }
 
         /// <summary>
@@ -145,7 +145,6 @@ namespace ProcessForUWP.UWP
         /// <exception cref="InvalidOperationException">Initializes process failed.</exception>
         public ProcessEx(double s = 10)
         {
-            if (!Communication.IsInitialized(s)) { throw new InvalidOperationException("Have not initialized process yet."); }
             Communication.RequestReceived += Connection_RequestReceived;
             (bool IsReceive, Message Received) = Communication.GetMessages(nameof(Communication), MessageType.NewProcess, CommunicationID, MessageType.Message);
             if (!IsReceive || Received?.GetPackage<StatuesType>() != StatuesType.Success)
@@ -170,7 +169,7 @@ namespace ProcessForUWP.UWP
                 StandardOutput = new StreamReader(OutputStream);
                 OutputStreamWriter = new StreamWriter(OutputStream);
             }
-            Communication.SendMessages("RemoteProcess", MessageType.ProcessStart, CommunicationID, new StartInfo(StartInfo));
+            Communication.SendMessages(nameof(ProcessEx), MessageType.ProcessStart, CommunicationID, new StartInfo(StartInfo));
         }
 
         /// <summary>
@@ -190,7 +189,7 @@ namespace ProcessForUWP.UWP
         /// </summary>
         public new void Refresh()
         {
-            Communication.SendMessages("RemoteProcess", MessageType.Method, CommunicationID, nameof(Refresh));
+            Communication.SendMessages(nameof(ProcessEx), MessageType.Method, CommunicationID, nameof(Refresh));
         }
 
         /// <summary>
@@ -198,7 +197,7 @@ namespace ProcessForUWP.UWP
         /// </summary>
         public new void BeginErrorReadLine()
         {
-            Communication.SendMessages("RemoteProcess", MessageType.Method, CommunicationID, nameof(BeginErrorReadLine));
+            Communication.SendMessages(nameof(ProcessEx), MessageType.Method, CommunicationID, nameof(BeginErrorReadLine));
         }
 
         /// <summary>
@@ -206,7 +205,7 @@ namespace ProcessForUWP.UWP
         /// </summary>
         public new void BeginOutputReadLine()
         {
-            Communication.SendMessages("RemoteProcess", MessageType.Method, CommunicationID, nameof(BeginOutputReadLine));
+            Communication.SendMessages(nameof(ProcessEx), MessageType.Method, CommunicationID, nameof(BeginOutputReadLine));
         }
 
         /// <summary>
@@ -214,7 +213,7 @@ namespace ProcessForUWP.UWP
         /// </summary>
         public new void Close()
         {
-            Communication.SendMessages("RemoteProcess", MessageType.Method, CommunicationID, nameof(Close));
+            Communication.SendMessages(nameof(ProcessEx), MessageType.Method, CommunicationID, nameof(Close));
             Communication.RequestReceived -= Connection_RequestReceived;
             OutputStreamWriter?.Dispose();
             ErrorStreamWriter?.Dispose();
@@ -231,7 +230,7 @@ namespace ProcessForUWP.UWP
         /// </summary>
         public new void Dispose()
         {
-            Communication.SendMessages("RemoteProcess", MessageType.Method, CommunicationID, nameof(Dispose));
+            Communication.SendMessages(nameof(ProcessEx), MessageType.Method, CommunicationID, nameof(Dispose));
             Communication.RequestReceived -= Connection_RequestReceived;
             OutputStreamWriter?.Dispose();
             ErrorStreamWriter?.Dispose();
@@ -249,7 +248,7 @@ namespace ProcessForUWP.UWP
         /// </summary>
         public new void Kill()
         {
-            Communication.SendMessages("RemoteProcess", MessageType.Method, CommunicationID, nameof(Kill));
+            Communication.SendMessages(nameof(ProcessEx), MessageType.Method, CommunicationID, nameof(Kill));
             Communication.RequestReceived -= Connection_RequestReceived;
             OutputStreamWriter?.Dispose();
             ErrorStreamWriter?.Dispose();
