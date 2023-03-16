@@ -4,11 +4,13 @@ using ProcessForUWP.Demo.Pages;
 using ProcessForUWP.Demo.ViewModels;
 using System;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.Core;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
+using FontIconSource = Microsoft.UI.Xaml.Controls.FontIconSource;
 
 // https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x804 上介绍了“空白页”项模板
 
@@ -22,22 +24,28 @@ namespace ProcessForUWP.Demo
         public MainPage()
         {
             InitializeComponent();
-            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
             Window.Current.SetTitleBar(CustomDragRegion);
-            UIHelper.ShellDispatcher = Dispatcher;
-            UIHelper.CheckTheme();
+            UIHelper.ShellDispatcher = DispatcherQueue.GetForCurrentThread();
         }
 
         private async void TabView_Loaded(object sender, RoutedEventArgs e)
         {
             string path = await PickProcess();
-            (sender as TabView).TabItems.Add(CreateNewTab(0, path));
-            (sender as TabView).SelectedIndex = 0;
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                (sender as TabView).TabItems.Add(CreateNewTab(0, path));
+                (sender as TabView).SelectedIndex = 0;
+            }
         }
 
         private async void TabView_AddTabButtonClick(TabView sender, object args)
         {
-            sender.TabItems.Add(CreateNewTab(sender.TabItems.Count, await PickProcess()));
+            string path = await PickProcess();
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                sender.TabItems.Add(CreateNewTab(sender.TabItems.Count, path));
+                sender.SelectedIndex += 1;
+            }
         }
 
         private void TabView_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
@@ -60,13 +68,17 @@ namespace ProcessForUWP.Demo
             TabViewItem newItem = new()
             {
                 Header = $"ProcessEx {index}",
-                IconSource = new Microsoft.UI.Xaml.Controls.SymbolIconSource() { Symbol = Symbol.Document }
+                IconSource = new FontIconSource
+                {
+                    Glyph = "\uE7C3",
+                    FontFamily = (FontFamily)Application.Current.Resources["SymbolThemeFontFamily"]
+                }
             };
 
             // The content of the tab is often a frame that contains a page, though it could be any UIElement.
             Frame frame = new();
 
-            frame.Navigate(typeof(TerminalPage), new TerminalViewModel(path));
+            frame.Navigate(typeof(TerminalPage), new TerminalViewModel(path, DispatcherQueue.GetForCurrentThread()));
 
             newItem.Content = frame;
 

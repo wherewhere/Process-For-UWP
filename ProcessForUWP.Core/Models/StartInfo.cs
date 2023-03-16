@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.Versioning;
 using System.Security;
 using System.Text;
 
@@ -8,6 +9,9 @@ namespace ProcessForUWP.Core.Models
     /// <summary>
     /// 指定启动进程时使用的一组值。
     /// </summary>
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     internal class StartInfo
     {
         public string Arguments { get; set; }

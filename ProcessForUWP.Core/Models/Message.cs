@@ -2,7 +2,7 @@
 
 namespace ProcessForUWP.Core.Models
 {
-    public class Message
+    internal class Message
     {
         public int ID { get; set; }
         public string Package { get; set; }

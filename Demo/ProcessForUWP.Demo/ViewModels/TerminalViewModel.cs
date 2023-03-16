@@ -1,15 +1,18 @@
-﻿using ProcessForUWP.Demo.Helpers;
+﻿using Microsoft.Toolkit.Uwp;
+using ProcessForUWP.UWP;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Windows.UI.Core;
+using Windows.System;
 
 namespace ProcessForUWP.Demo.ViewModels
 {
     public class TerminalViewModel : INotifyPropertyChanged
     {
         private readonly string _path;
-        private UWP.ProcessEx _process;
+        private ProcessEx _process;
+
+        public DispatcherQueue DispatcherQueue { get; private set; }
 
         private string _outputData = string.Empty;
         public string OutputData
@@ -29,9 +32,10 @@ namespace ProcessForUWP.Demo.ViewModels
             if (name != null) { PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name)); }
         }
 
-        public TerminalViewModel(string Path)
+        public TerminalViewModel(string path, DispatcherQueue dispatcher)
         {
-            _path = Path;
+            _path = path;
+            DispatcherQueue = dispatcher;
         }
 
         public async Task Refresh()
@@ -46,7 +50,7 @@ namespace ProcessForUWP.Demo.ViewModels
                     RedirectStandardOutput = true,
                     CreateNoWindow = true
                 };
-                _process = await Task.Run(() => { return new UWP.ProcessEx { StartInfo = info }; });
+                _process = await Task.Run(() => new ProcessEx { StartInfo = info });
                 _process.Start();
                 _process.BeginErrorReadLine();
                 _process.BeginOutputReadLine();
@@ -61,9 +65,9 @@ namespace ProcessForUWP.Demo.ViewModels
             }
         }
 
-        private void OnOutputDataReceived(UWP.ProcessEx sender, UWP.DataReceivedEventArgsEx e)
+        private void OnOutputDataReceived(ProcessEx sender, DataReceivedEventArgsEx e)
         {
-            _ = UIHelper.ShellDispatcher.RunAsync(CoreDispatcherPriority.Normal, () => OutputData += $"{e.Data}\n");
+            _ = DispatcherQueue.EnqueueAsync(() => OutputData += $"{e.Data}\n");
         }
     }
 }

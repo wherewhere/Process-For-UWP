@@ -3,7 +3,7 @@
     /// <summary>
     /// The type of message
     /// </summary>
-    public enum MessageType
+    internal enum MessageType
     {
         Method,
         Message,

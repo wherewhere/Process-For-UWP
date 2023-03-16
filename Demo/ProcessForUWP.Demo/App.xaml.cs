@@ -1,7 +1,14 @@
-﻿using ProcessForUWP.UWP.Helpers;
+﻿using ProcessForUWP.Demo.Helpers;
+using ProcessForUWP.UWP.Helpers;
 using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.Core;
+using Windows.ApplicationModel.Resources;
+using Windows.Foundation.Metadata;
+using Windows.System.Profile;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -20,7 +27,14 @@ namespace ProcessForUWP.Demo
         public App()
         {
             InitializeComponent();
+
             Suspending += OnSuspending;
+            UnhandledException += Application_UnhandledException;
+
+            if (ApiInformation.IsEnumNamedValuePresent("Windows.UI.Xaml.FocusVisualKind", "Reveal"))
+            {
+                FocusVisualKind = AnalyticsInfo.VersionInfo.DeviceFamily == "Windows.Xbox" ? FocusVisualKind.Reveal : FocusVisualKind.HighVisibility;
+            }
         }
 
         /// <summary>
@@ -32,11 +46,20 @@ namespace ProcessForUWP.Demo
         {
             Communication.InitializeAppServiceConnection();
 
+            if (MainWindow == null)
+            {
+                RegisterExceptionHandlingSynchronizationContext();
+
+                MainWindow = Window.Current;
+                WindowHelper.TrackWindow(MainWindow);
+            }
 
             // 不要在窗口已包含内容时重复应用程序初始化，
             // 只需确保窗口处于活动状态
-            if (Window.Current.Content is not Frame rootFrame)
+            if (MainWindow.Content is not Frame rootFrame)
             {
+                CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
+
                 // 创建要充当导航上下文的框架，并导航到第一页
                 rootFrame = new Frame();
 
@@ -48,11 +71,14 @@ namespace ProcessForUWP.Demo
                 }
 
                 // 将框架放在当前窗口中
-                Window.Current.Content = rootFrame;
+                MainWindow.Content = rootFrame;
+
+                ThemeHelper.Initialize();
             }
 
-            if (e.PrelaunchActivated == false)
+            if (!e.PrelaunchActivated)
             {
+                CoreApplication.EnablePrelaunch(true);
                 if (rootFrame.Content == null)
                 {
                     // 当导航堆栈尚未还原时，导航到第一页，
@@ -61,7 +87,7 @@ namespace ProcessForUWP.Demo
                     rootFrame.Navigate(typeof(MainPage), e.Arguments);
                 }
                 // 确保当前窗口处于活动状态
-                Window.Current.Activate();
+                MainWindow.Activate();
             }
         }
 
@@ -89,6 +115,28 @@ namespace ProcessForUWP.Demo
             deferral.Complete();
         }
 
+        private void Application_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
+        {
+            SettingsHelper.LogManager.GetLogger("Unhandled Exception - Application").Error(e.Exception.ExceptionToMessage(), e.Exception);
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Should be called from OnActivated and OnLaunched
+        /// </summary>
+        private void RegisterExceptionHandlingSynchronizationContext()
+        {
+            ExceptionHandlingSynchronizationContext
+                .Register()
+                .UnhandledException += SynchronizationContext_UnhandledException;
+        }
+
+        private void SynchronizationContext_UnhandledException(object sender, Helpers.UnhandledExceptionEventArgs e)
+        {
+            SettingsHelper.LogManager.GetLogger("Unhandled Exception - SynchronizationContext").Error(e.Exception.ExceptionToMessage(), e.Exception);
+            e.Handled = true;
+        }
+
         /// <summary>
         /// Handles connection requests to the app service
         /// </summary>
@@ -98,5 +146,7 @@ namespace ProcessForUWP.Demo
             base.OnBackgroundActivated(args);
             Communication.OnBackgroundActivated(args);
         }
+
+        public static Window MainWindow { get; private set; }
     }
 }

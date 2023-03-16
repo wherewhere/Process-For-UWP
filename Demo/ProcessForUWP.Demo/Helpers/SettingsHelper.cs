@@ -1,64 +1,38 @@
-﻿using Microsoft.Toolkit.Uwp.Helpers;
+﻿using MetroLog;
+using Microsoft.Toolkit.Uwp.Helpers;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
-using Windows.UI;
-using Windows.UI.Core;
-using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
+using IObjectSerializer = Microsoft.Toolkit.Helpers.IObjectSerializer;
 
 namespace ProcessForUWP.Demo.Helpers
 {
     internal static partial class SettingsHelper
     {
-        public const string IsDarkMode = "IsDarkMode";
-        public const string IsBackgroundColorFollowSystem = "IsBackgroundColorFollowSystem";
+        public const string SelectedAppTheme = nameof(SelectedAppTheme);
 
         public static Type Get<Type>(string key) => LocalObject.Read<Type>(key);
-        public static void Set(string key, object value) => LocalObject.Save(key, value);
-        public static void SetFile(string key, object value) => LocalObject.SaveFileAsync(key, value);
+        public static void Set<Type>(string key, Type value) => LocalObject.Save(key, value);
+        public static void SetFile<Type>(string key, Type value) => LocalObject.CreateFileAsync(key, value);
         public static async Task<Type> GetFile<Type>(string key) => await LocalObject.ReadFileAsync<Type>(key);
 
         public static void SetDefaultSettings()
         {
-            if (!LocalObject.KeyExists(IsDarkMode))
+            if (!LocalObject.KeyExists(SelectedAppTheme))
             {
-                LocalObject.Save(IsDarkMode, false);
-            }
-            if (!LocalObject.KeyExists(IsBackgroundColorFollowSystem))
-            {
-                LocalObject.Save(IsBackgroundColorFollowSystem, true);
+                LocalObject.Save(SelectedAppTheme, ElementTheme.Default);
             }
         }
-    }
-
-    public enum UISettingChangedType
-    {
-        LightMode,
-        DarkMode,
-        NoPicChanged,
     }
 
     internal static partial class SettingsHelper
     {
-        public static readonly UISettings UISettings = new();
-        public static OSVersion OperatingSystemVersion => SystemInformation.OperatingSystemVersion;
-        private static readonly LocalObjectStorageHelper LocalObject = new(new SystemTextJsonObjectSerializer());
-        public static ElementTheme Theme => Get<bool>("IsBackgroundColorFollowSystem") ? ElementTheme.Default : (Get<bool>("IsDarkMode") ? ElementTheme.Dark : ElementTheme.Light);
+        public static readonly ILogManager LogManager = LogManagerFactory.CreateLogManager();
+        public static readonly ApplicationDataStorageHelper LocalObject = ApplicationDataStorageHelper.GetCurrent(new SystemTextJsonObjectSerializer());
 
         static SettingsHelper()
         {
             SetDefaultSettings();
-            UISettings.ColorValuesChanged += SetBackgroundTheme;
-        }
-
-        private static void SetBackgroundTheme(UISettings sender, object args)
-        {
-            if (Get<bool>(IsBackgroundColorFollowSystem))
-            {
-                bool value = sender.GetColorValue(UIColorType.Background) == Colors.Black;
-                Set(IsDarkMode, value);
-                _ = UIHelper.ShellDispatcher?.RunAsync(CoreDispatcherPriority.Normal, UIHelper.CheckTheme);
-            }
         }
     }
 

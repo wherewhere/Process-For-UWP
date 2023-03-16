@@ -3,7 +3,7 @@
     /// <summary>
     /// StatuesType
     /// </summary>
-    public enum StatuesType
+    internal enum StatuesType
     {
         /// <summary>
         /// Success
