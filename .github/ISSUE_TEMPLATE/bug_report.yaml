@@ -31,6 +31,7 @@ body:
       label: NuGet package version
       description: Specify the version of Mica For UWP you're using.
       options:
+        - "0.0.5"
         - "0.0.4"
         - "0.0.3"
         - "0.0.2"
@@ -49,7 +50,9 @@ body:
       description: Which Windows versions did you see the issue on?
       options:
         - "Insider Build (xxxxx)"
+        - "Windows 11 version 22H2 (22621, 2022 Update)"
         - "Windows 11 version 21H2 (22000)"
+        - "Windows 10 version 22H2 (19045, 2022 Update)"
         - "Windows 10 version 21H2 (19044, November 2021 Update)"
         - "Windows 10 version 21H1 (19043, May 2021 Update)"
         - "Windows 10 version 20H2 (19042, October 2020 Update)"
@@ -59,6 +62,7 @@ body:
         - "Windows 10 version 1809 (17763, October 2018 Update)"
         - "Windows 10 version 1803 (17134, April 2018 Update)"
         - "Windows 10 version 1709 (16299, Fall Creators Update)"
+        - "Windows 10 version 1709 (15254, Fall Creators Update)"
   - type: dropdown
     attributes:
       label: IDE
