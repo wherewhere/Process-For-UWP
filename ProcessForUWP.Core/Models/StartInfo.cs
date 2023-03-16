@@ -8,7 +8,7 @@ namespace ProcessForUWP.Core.Models
     /// <summary>
     /// 指定启动进程时使用的一组值。
     /// </summary>
-    public class StartInfo
+    internal class StartInfo
     {
         public string Arguments { get; set; }
         public bool CreateNoWindow { get; set; }

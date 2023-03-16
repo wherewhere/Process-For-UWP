@@ -1,0 +1,18 @@
+<Project>
+
+  <PropertyGroup>
+    <Authors>wherewhere</Authors>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <Copyright>Copyright © 2017 - 2023 wherewhere. All Rights Reserved.</Copyright>
+    <Deterministic>true</Deterministic>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <LangVersion>latest</LangVersion>
+    <IncludeSymbols>True</IncludeSymbols>
+    <PackageProjectUrl>https://github.com/wherewhere/Process-For-UWP</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/wherewhere/Process-For-UWP</RepositoryUrl>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+</Project>

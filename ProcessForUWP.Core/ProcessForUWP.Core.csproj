@@ -1,23 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="MSBuild.Sdk.Extras">
 
   <PropertyGroup>
-    <Authors>wherewhere</Authors>     
-    <Copyright>Copyright © 2017 - 2022 wherewhere. All Rights Reserved.</Copyright>    
-    <GenerateDocumentationFile>True</GenerateDocumentationFile> 
-    <LangVersion>latest</LangVersion>
-    <PackageProjectUrl>https://github.com/wherewhere/Process-For-UWP</PackageProjectUrl>
     <PackageTags>Process;Core;Message</PackageTags>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/wherewhere/Process-For-UWP</RepositoryUrl>
-    <TargetFrameworks>net4.5.2;net4.6.2;net4.8;netstandard2.0;netcoreapp3.1;net5.0</TargetFrameworks>
+    <TargetFrameworks>net4.5.2;net4.6.2;net4.8;netstandard2.0;netcoreapp3.1;net6.0;uap10.0</TargetFrameworks>
     <VersionPrefix>0.0.3</VersionPrefix>
-    <Description>
-        一种适用于 UWP 平台的 Process 方法
-        本项目基于 @Silver-Fang 的项目 ProcessForUWP，与其不同的是，本项目利用了通信接口 AppServiceConnection 来进行应用间的通信，所以不用执行一次就弹一次 UAC，但是使用起来会比较麻烦。目前仍在开发当中，如果有兴趣欢迎加入。
-        本 Nuget 包为主包依赖，默认不会显示在 Nuget 仓库，请安装 ProcessForUWP.UWP 和 ProcessForUWP.Desktop。</Description>
+    <Description>一种适用于 UWP 平台的 Process 方法
+本项目基于 @Silver-Fang 的项目 ProcessForUWP，与其不同的是，本项目利用了通信接口 AppServiceConnection 来进行应用间的通信，所以不用执行一次就弹一次 UAC，但是使用起来会比较麻烦。目前仍在开发当中，如果有兴趣欢迎加入。
+本 Nuget 包为主包依赖，默认不会显示在 Nuget 仓库，请安装 ProcessForUWP.UWP 和 ProcessForUWP.Desktop。</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'uap10.0'">
+    <ExtrasUwpMetaPackageVersion>6.2.14</ExtrasUwpMetaPackageVersion>
+    <TargetPlatformMinVersion>10.0.15138.0</TargetPlatformMinVersion>
+    <TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="ProcessForUWP.UWP" />
+    <InternalsVisibleTo Include="ProcessForUWP.Desktop" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 

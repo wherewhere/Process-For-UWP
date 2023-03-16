@@ -1,6 +1,6 @@
 ﻿namespace ProcessForUWP.Core.Helpers
 {
-    public static class Utils
+    internal static class Utils
     {
         public static object GetProperty(this object item, string name) => item.GetType().GetProperty(name).GetValue(item, null);
 
