@@ -1,11 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ImplicitUsings>Enable</ImplicitUsings>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net4.8</TargetFramework>
+    <TargetFramework>net4.7.2</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Platforms>x86;x64;ARM;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <Description>一种适用于 UWP 平台的 Process 方法</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0'))">
+    <RuntimeIdentifiers>$(RuntimeIdentifiers);win-arm</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,0 +1,89 @@
+﻿<Project Sdk="MSBuild.Sdk.Extras">
+
+  <PropertyGroup>
+    <CsWinRTIncludes>ProcessForUWP.Core</CsWinRTIncludes>
+    <CsWinRTWindowsMetadata>10.0.22621.0+</CsWinRTWindowsMetadata>
+    <ExtrasUwpMetaPackageVersion>6.2.14</ExtrasUwpMetaPackageVersion>
+    <Nullable>enable</Nullable>
+    <PackageIcon>Icon.png</PackageIcon>
+    <PackageId>ProcessForUWP.Core</PackageId>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>$(PackageTags);Core;Metadata;Projection;Message</PackageTags>
+    <RootNamespace>ProcessForUWP.Core</RootNamespace>
+    <TargetFrameworks>net4.5;net4.6.1;net6.0-windows10.0.17763.0;net8.0-windows10.0.17763.0;netcoreapp3.1;netstandard1.0;netstandard2.0;uap10.0;uap10.0.15138.0</TargetFrameworks>
+    <TargetPlatformMinVersion>10.0</TargetPlatformMinVersion>
+    <TargetPlatformVersion>10.0.26100.0</TargetPlatformVersion>
+    <VersionPrefix>0.1.6</VersionPrefix>
+    <Description>$(Description)
+本 Nuget 包为主包依赖，默认不会显示在 Nuget 仓库，请安装 ProcessForUWP.UWP 和 ProcessForUWP.Desktop。</Description>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">True</IsAotCompatible>
+    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">True</IsTrimmable>
+    <TargetsForTfmSpecificBuildOutput Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0'))">$(TargetsForTfmSpecificBuildOutput);AddWinMDToPackage</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.0'))">
+    <DefineConstants>$(DefineConstants);COMP_NETSTANDARD2_0</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0-windows10.0.17763.0'))">
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'uap10.0.15138.0'">
+    <TargetPlatformMinVersion>10.0.15138.0</TargetPlatformMinVersion>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0-windows10.0.17763.0'))">
+    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard1.0'))
+                   and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.0'))
+                   and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'uap'))">
+    <PackageReference Include="System.Runtime.WindowsRuntime" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.0'))
+                   and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'uap10.0'))
+                   and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0'))">
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.26100.4654" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0'))">
+    <CsWinRTInputs Include="..\WinMD\$(Configuration)\ProcessForUWP.Core.winmd" />
+    <ReferenceCopyLocalPaths Include="..\WinMD\$(Configuration)\ProcessForUWP.Core.winmd" />
+  </ItemGroup>
+
+  <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0'))">
+    <Reference Include="ProcessForUWP.Core">
+      <HintPath>..\WinMD\$(Configuration)\ProcessForUWP.Core.winmd</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\WinRTWrapper\WinRTWrapper.SourceGenerators\WinRTWrapper.SourceGenerators.csproj">
+      <OutputItemType>Analyzer</OutputItemType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <SetTargetFramework>TargetFramework=netstandard2.0</SetTargetFramework>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\WinMD\$(Configuration)\ProcessForUWP.Core.winmd" PackagePath="lib\native\ProcessForUWP.Core.winmd" Pack="true" Visible="false" />
+    <None Include="ProcessForUWP.Core.Native.targets" PackagePath="build\native\ProcessForUWP.Core.targets" Pack="true" Visible="false" />
+    <None Include="ProcessForUWP.Core.CSWinRT.targets" PackagePath="build\net6.0-windows10.0.17763\ProcessForUWP.Core.targets" Pack="true" Visible="false" />
+    <None Include="ProcessForUWP.Core.CSWinRT.targets" PackagePath="build\net8.0-windows10.0.17763\ProcessForUWP.Core.targets" Pack="true" Visible="false" />
+    <None Include="..\logo.png" PackagePath="\Icon.png" Pack="true" Visible="false" />
+    <None Include="..\README.md" PackagePath="\README.md" Pack="true" Visible="false" />
+  </ItemGroup>
+
+  <Target Name="AddWinMDToPackage">
+    <ItemGroup>
+      <BuildOutputInPackage Include="..\WinMD\$(Configuration)\ProcessForUWP.Core.winmd" />
+    </ItemGroup>
+  </Target>
+
+</Project>

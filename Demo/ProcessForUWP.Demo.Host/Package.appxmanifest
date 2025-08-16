@@ -3,19 +3,20 @@
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
-  IgnorableNamespaces="uap rescap desktop">
+  IgnorableNamespaces="uap com rescap">
 
   <Identity
-    Name="dcea940d-f637-4f6d-acb4-035be65b0e49"
-    Publisher="CN=qq251"
-    Version="1.0.0.0" />
+    Name="wherewhere.ProcessForUWP.Demo"
+    Publisher="CN=where"
+    Version="0.0.1.0" />
 
   <Properties>
-    <DisplayName>ProcessForUWP.Demo.Host</DisplayName>
-    <PublisherDisplayName>qq251</PublisherDisplayName>
-    <Logo>Images\StoreLogo.png</Logo>
+    <DisplayName>ProcessForUWP</DisplayName>
+    <PublisherDisplayName>wherewhere</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
   <Dependencies>
@@ -32,25 +33,45 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="ProcessForUWP.Demo.Host"
-        Description="ProcessForUWP.Demo.Host"
+        DisplayName="ProcessForUWP"
+        Description="一种适用于 UWP 平台的 Process 方法"
         BackgroundColor="transparent"
-        Square150x150Logo="Images\Square150x150Logo.png"
-        Square44x44Logo="Images\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png" />
-        <uap:SplashScreen Image="Images\SplashScreen.png" />
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+          <uap:DefaultTile
+            Wide310x150Logo="Assets\Wide310x150Logo.png"
+            Square71x71Logo="Assets\SmallTile.png"
+            Square310x310Logo="Assets\LargeTile.png">
+              <uap:ShowNameOnTiles>
+                  <uap:ShowOn Tile="square150x150Logo"/>
+                  <uap:ShowOn Tile="wide310x150Logo"/>
+                  <uap:ShowOn Tile="square310x310Logo"/>
+              </uap:ShowNameOnTiles>
+          </uap:DefaultTile >
+          <uap:SplashScreen Image="Assets\SplashScreen.png" uap5:Optional="true" />
+          <uap:InitialRotationPreference>
+              <uap:Rotation Preference="landscape"/>
+              <uap:Rotation Preference="portrait"/>
+              <uap:Rotation Preference="landscapeFlipped"/>
+              <uap:Rotation Preference="portraitFlipped"/>
+          </uap:InitialRotationPreference>
       </uap:VisualElements>
       <Extensions>
-        <uap:Extension Category="windows.appService">
-          <uap:AppService Name="ProcessForUWP.Delegate"/>
-        </uap:Extension>
-		<desktop:Extension Category="windows.fullTrustProcess" Executable="ProcessForUWP.Demo.Delegate\ProcessForUWP.Demo.Delegate.exe" />
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <com:ExeServer
+              Executable="ProcessForUWP.Demo.Delegate\ProcessForUWP.Demo.Delegate.exe"
+              DisplayName="ProcessForUWP Delegate"
+              LaunchAndActivationPermission="O:SYG:SYD:(A;;11;;;WD)(A;;11;;;RC)(A;;11;;;AC)(A;;11;;;AN)S:P(ML;;NX;;;S-1-16-0)">
+              <com:Class Id="89575E89-722D-4D0A-9BE7-0AB808C9C4BB" DisplayName="ProcessForUWP Delegate" />
+            </com:ExeServer>
+          </com:ComServer>
+        </com:Extension>
       </Extensions>
     </Application>
   </Applications>
 
   <Capabilities>
-    <Capability Name="internetClient" />
     <rescap:Capability Name="runFullTrust" />
   </Capabilities>
 </Package>

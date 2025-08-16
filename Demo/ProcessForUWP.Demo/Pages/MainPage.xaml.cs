@@ -1,12 +1,10 @@
 ﻿using Microsoft.UI.Xaml.Controls;
-using ProcessForUWP.Demo.Helpers;
 using ProcessForUWP.Demo.Pages;
 using ProcessForUWP.Demo.ViewModels;
 using System;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
@@ -25,16 +23,14 @@ namespace ProcessForUWP.Demo
         {
             InitializeComponent();
             Window.Current.SetTitleBar(CustomDragRegion);
-            UIHelper.ShellDispatcher = DispatcherQueue.GetForCurrentThread();
         }
 
-        private async void TabView_Loaded(object sender, RoutedEventArgs e)
+        private void TabView_Loaded(object sender, RoutedEventArgs e)
         {
-            string path = await PickProcess();
-            if (!string.IsNullOrWhiteSpace(path))
+            if (sender is TabView tabView)
             {
-                (sender as TabView).TabItems.Add(CreateNewTab(0, path));
-                (sender as TabView).SelectedIndex = 0;
+                tabView.TabItems.Add(CreateNewTab(0, "cmd"));
+                tabView.SelectedIndex = 0;
             }
         }
 
@@ -78,7 +74,7 @@ namespace ProcessForUWP.Demo
             // The content of the tab is often a frame that contains a page, though it could be any UIElement.
             Frame frame = new();
 
-            frame.Navigate(typeof(TerminalPage), new TerminalViewModel(path, DispatcherQueue.GetForCurrentThread()));
+            frame.Navigate(typeof(TerminalPage), new TerminalViewModel(path, newItem));
 
             newItem.Content = frame;
 

@@ -1,16 +1,14 @@
 ﻿using ProcessForUWP.Demo.Helpers;
-using ProcessForUWP.UWP.Helpers;
+using ProcessForUWP.UWP;
 using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Core;
-using Windows.ApplicationModel.Resources;
 using Windows.Foundation.Metadata;
 using Windows.System.Profile;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
 namespace ProcessForUWP.Demo
@@ -30,6 +28,7 @@ namespace ProcessForUWP.Demo
 
             Suspending += OnSuspending;
             UnhandledException += Application_UnhandledException;
+            ProcessProjectionFactory.CLSID_IServerManager = new Guid("89575E89-722D-4D0A-9BE7-0AB808C9C4BB");
 
             if (ApiInformation.IsEnumNamedValuePresent("Windows.UI.Xaml.FocusVisualKind", "Reveal"))
             {
@@ -44,19 +43,17 @@ namespace ProcessForUWP.Demo
         /// <param name="e">有关启动请求和过程的详细信息。</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-            Communication.InitializeAppServiceConnection();
-
-            if (MainWindow == null)
+            if (!isLoaded)
             {
                 RegisterExceptionHandlingSynchronizationContext();
-
-                MainWindow = Window.Current;
-                WindowHelper.TrackWindow(MainWindow);
+                isLoaded = true;
             }
+
+            Window window = Window.Current;
 
             // 不要在窗口已包含内容时重复应用程序初始化，
             // 只需确保窗口处于活动状态
-            if (MainWindow.Content is not Frame rootFrame)
+            if (window.Content is not Frame rootFrame)
             {
                 CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
 
@@ -71,23 +68,29 @@ namespace ProcessForUWP.Demo
                 }
 
                 // 将框架放在当前窗口中
-                MainWindow.Content = rootFrame;
+                window.Content = rootFrame;
 
-                ThemeHelper.Initialize();
+                WindowHelper.TrackWindow(window);
+                ThemeHelper.Initialize(window);
             }
 
             if (!e.PrelaunchActivated)
             {
-                CoreApplication.EnablePrelaunch(true);
+                if (ApiInformation.IsMethodPresent("Windows.ApplicationModel.Core.CoreApplication", "EnablePrelaunch"))
+                {
+                    CoreApplication.EnablePrelaunch(true);
+                }
+
                 if (rootFrame.Content == null)
                 {
                     // 当导航堆栈尚未还原时，导航到第一页，
                     // 并通过将所需信息作为导航参数传入来配置
                     // 参数
-                    rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                    rootFrame.Navigate(typeof(MainPage), e.Arguments, new DrillInNavigationTransitionInfo());
                 }
+
                 // 确保当前窗口处于活动状态
-                MainWindow.Activate();
+                window.Activate();
             }
         }
 
@@ -137,16 +140,6 @@ namespace ProcessForUWP.Demo
             e.Handled = true;
         }
 
-        /// <summary>
-        /// Handles connection requests to the app service
-        /// </summary>
-        /// <param name="args">Data about the background activation.</param>
-        protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)
-        {
-            base.OnBackgroundActivated(args);
-            Communication.OnBackgroundActivated(args);
-        }
-
-        public static Window MainWindow { get; private set; }
+        private bool isLoaded;
     }
 }

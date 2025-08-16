@@ -14,6 +14,6 @@ namespace ProcessForUWP.Demo.Helpers
 
         public static void UntrackWindow(Window window) => ActiveWindows.Remove(window);
 
-        public static List<Window> ActiveWindows { get; } = new List<Window>();
+        public static List<Window> ActiveWindows { get; } = [];
     }
 }

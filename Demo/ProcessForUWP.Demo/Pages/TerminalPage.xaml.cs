@@ -1,4 +1,5 @@
 ﻿using ProcessForUWP.Demo.ViewModels;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
@@ -15,15 +16,17 @@ namespace ProcessForUWP.Demo.Pages
 
         public TerminalPage() => InitializeComponent();
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
             if (e.Parameter is TerminalViewModel ViewModel)
             {
                 Provider = ViewModel;
-                DataContext = ViewModel;
-                await Provider.Refresh();
+                ViewModel.Block = Message;
+                _ = Provider.Refresh();
             }
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e) => _ = Provider.SendCommandAsync(Input.Text);
     }
 }

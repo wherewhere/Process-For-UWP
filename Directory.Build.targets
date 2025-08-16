@@ -1,73 +1,7 @@
 ﻿<Project>
-  <PropertyGroup Condition="('$(TargetFrameworkIdentifier)' == '.NETFramework' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '4.5'))) or
-                             '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <DefineConstants>$(DefineConstants);NET45_OR_NEWER</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="('$(TargetFrameworkIdentifier)' == '.NETFramework' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '4.6'))) or
-                             '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <DefineConstants>$(DefineConstants);NET46_OR_NEWER</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="('$(TargetFrameworkIdentifier)' == '.NETFramework' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '4.6.2'))) or
-                             '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <DefineConstants>$(DefineConstants);NET462_OR_NEWER</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="('$(TargetFrameworkIdentifier)' == '.NETFramework' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '4.7'))) or
-                             '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <DefineConstants>$(DefineConstants);NET47_OR_NEWER</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="('$(TargetFrameworkIdentifier)' == '.NETFramework' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '4.7.2'))) or
-                             '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <DefineConstants>$(DefineConstants);NET472_OR_NEWER</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="('$(TargetFrameworkIdentifier)' == '.NETFramework' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '4.8'))) or
-                             '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <DefineConstants>$(DefineConstants);NET48_OR_NEWER</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '5.0'))">
-    <DefineConstants>$(DefineConstants);NET5_0_OR_NEWER</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '1.0'))">
-    <DefineConstants>$(DefineConstants);NETSTANDARD1_0_OR_NEWER</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '2.0'))">
-    <DefineConstants>$(DefineConstants);NETSTANDARD2_0_OR_NEWER</DefineConstants>
-  </PropertyGroup>
-
-  <Choose>
-    <When Condition="'$(UseWinRT)' == 'true'">
-      <Choose>
-        <When Condition="$(DefineConstants.Contains('NET5_0_OR_NEWER'))" />
-        <When Condition="$(DefineConstants.Contains('NET46_OR_NEWER'))">
-          <ItemGroup>
-            <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.22621.755" />
-          </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('NETSTANDARD2_0_OR_NEWER'))">
-          <ItemGroup>
-            <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.22621.755" />
-          </ItemGroup>
-        </When>
-		<Otherwise>
-          <ItemGroup>
-            <PackageReference Include="System.Runtime.WindowsRuntime" Version="4.7.0" />
-            <Reference Include="Windows">
-              <HintPath>$(MSBuildThisFileDirectory)WinMD\Windows.WinMD</HintPath>
-              <IsWinMDFile>true</IsWinMDFile>
-              <Private>false</Private>
-            </Reference>
-            <Reference Include="Windows.Foundation.FoundationContract">
-              <HintPath>$(MSBuildThisFileDirectory)WinMD\Windows.Foundation.FoundationContract.winmd</HintPath>
-              <IsWinMDFile>true</IsWinMDFile>
-              <Private>false</Private>
-            </Reference>
-            <Reference Include="Windows.Foundation.UniversalApiContract">
-              <HintPath>$(MSBuildThisFileDirectory)WinMD\Windows.Foundation.UniversalApiContract.winmd</HintPath>
-              <IsWinMDFile>true</IsWinMDFile>
-              <Private>false</Private>
-            </Reference>
-          </ItemGroup>
-        </Otherwise>
-      </Choose>
-    </When>
-  </Choose>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>

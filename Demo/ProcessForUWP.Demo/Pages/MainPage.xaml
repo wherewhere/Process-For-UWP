@@ -10,7 +10,9 @@
     mc:Ignorable="d">
     <muxc:TabView
         HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
         HorizontalContentAlignment="Stretch"
+        VerticalContentAlignment="Stretch"
         AddTabButtonClick="TabView_AddTabButtonClick"
         Loaded="TabView_Loaded"
         TabCloseRequested="TabView_TabCloseRequested">

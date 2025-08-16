@@ -1,0 +1,286 @@
+namespace ProcessForUWP.Core
+{
+    [contractversion(6)]
+    apicontract ProcessForUWPContract{};
+
+    [contract(ProcessForUWPContract, 6)]
+    interface ITextReader requires Windows.Foundation.IClosable
+    {
+        void Close();
+        Int32 Peek();
+        Int32 Read();
+        Int32 Read(Char[] buffer, Int32 index, Int32 count);
+        Windows.Foundation.IAsyncOperation<Int32> ReadAsync(Char[] buffer, Int32 index, Int32 count);
+        Int32 ReadBlock(Char[] buffer, Int32 index, Int32 count);
+        Windows.Foundation.IAsyncOperation<Int32> ReadBlockAsync(Char[] buffer, Int32 index, Int32 count);
+        String ReadLine();
+        Windows.Foundation.IAsyncOperation<String> ReadLineAsync();
+        String ReadToEnd();
+        Windows.Foundation.IAsyncOperation<String> ReadToEndAsync();
+    }
+
+    [contract(ProcessForUWPContract, 6)]
+    interface IStreamReader requires ITextReader
+    {
+        Windows.Storage.Streams.IOutputStream BaseStream { get; };
+        Boolean EndOfStream { get; };
+
+        void DiscardBufferedData();
+    }
+
+    [contract(ProcessForUWPContract, 6)]
+    interface IAsyncDisposable
+    {
+        Windows.Foundation.IAsyncAction DisposeAsync();
+    }
+
+    [contract(ProcessForUWPContract, 6)]
+    interface ITextWriter requires IAsyncDisposable, Windows.Foundation.IClosable
+    {
+        String NewLine { get; set; };
+
+        void Flush();
+        Windows.Foundation.IAsyncAction FlushAsync();
+        [method_name("WriteUInt64")]
+        void Write(UInt64 value);
+        [method_name("WriteUInt32")]
+        void Write(UInt32 value);
+        [method_name("WriteFormat")]
+        void Write(String format, IInspectable[] args);
+        [method_name("WriteFormatWithThreeArgs")]
+        void Write(String format, IInspectable arg0, IInspectable arg1, IInspectable arg2);
+        [method_name("WriteFormatWithTwoArgs")]
+        void Write(String format, IInspectable arg0, IInspectable arg1);
+        [default_overload]
+        [method_name("WriteFormatWithOneArg")]
+        void Write(String format, IInspectable arg0);
+        [default_overload]
+        void Write(String value);
+        [method_name("WriteSingle")]
+        void Write(Single value);
+        [method_name("WriteInt64")]
+        void Write(Int64 value);
+        [method_name("WriteInt32")]
+        void Write(Int32 value);
+        [method_name("WriteInt16")]
+        void Write(Double value);
+        [default_overload]
+        [method_name("WriteArrayWithRange")]
+        void Write(Char[] buffer, Int32 index, Int32 count);
+        [method_name("WriteArray")]
+        void Write(Char[] buffer);
+        [method_name("WriteChar")]
+        void Write(Char value);
+        [method_name("WriteBoolean")]
+        void Write(Boolean value);
+        [method_name("WriteObject")]
+        void Write(IInspectable value);
+        [default_overload]
+        Windows.Foundation.IAsyncAction WriteAsync(String value);
+        [method_name("WriteArrayAsync")]
+        Windows.Foundation.IAsyncAction WriteAsync(Char[] buffer);
+        [method_name("WriteCharAsync")]
+        Windows.Foundation.IAsyncAction WriteAsync(Char value);
+        [method_name("WriteArrayWithRangeAsync")]
+        Windows.Foundation.IAsyncAction WriteAsync(Char[] buffer, Int32 index, Int32 count);
+        void WriteLine();
+        [method_name("WriteLineUInt64")]
+        void WriteLine(UInt64 value);
+        [method_name("WriteLineUInt32")]
+        void WriteLine(UInt32 value);
+        [method_name("WriteLineFormat")]
+        void WriteLine(String format, IInspectable[] args);
+        [method_name("WriteLineFormatWithThreeArgs")]
+        void WriteLine(String format, IInspectable arg0, IInspectable arg1, IInspectable arg2);
+        [method_name("WriteLineFormatWithTwoArgs")]
+        void WriteLine(String format, IInspectable arg0, IInspectable arg1);
+        [default_overload]
+        [method_name("WriteLineFormatWithOneArg")]
+        void WriteLine(String format, IInspectable arg0);
+        [default_overload]
+        void WriteLine(String value);
+        [method_name("WriteLineSingle")]
+        void WriteLine(Single value);
+        [method_name("WriteLineInt64")]
+        void WriteLine(Int64 value);
+        [method_name("WriteLineInt32")]
+        void WriteLine(Int32 value);
+        [method_name("WriteLineInt16")]
+        void WriteLine(Double value);
+        [default_overload]
+        [method_name("WriteLineArrayWithRange")]
+        void WriteLine(Char[] buffer, Int32 index, Int32 count);
+        [method_name("WriteLineArray")]
+        void WriteLine(Char[] buffer);
+        [method_name("WriteLineChar")]
+        void WriteLine(Char value);
+        [method_name("WriteLineBoolean")]
+        void WriteLine(Boolean value);
+        [method_name("WriteLineObject")]
+        void WriteLine(IInspectable value);
+        Windows.Foundation.IAsyncAction WriteLineAsync();
+        [default_overload]
+        Windows.Foundation.IAsyncAction WriteLineAsync(String value);
+        [method_name("WriteLineArrayAsync")]
+        Windows.Foundation.IAsyncAction WriteLineAsync(Char[] buffer);
+        [method_name("WriteLineCharAsync")]
+        Windows.Foundation.IAsyncAction WriteLineAsync(Char value);
+        [method_name("WriteLineArrayWithRangeAsync")]
+        Windows.Foundation.IAsyncAction WriteLineAsync(Char[] buffer, Int32 index, Int32 count);
+    }
+
+    [contract(ProcessForUWPContract, 6)]
+    interface IStreamWriter requires ITextWriter
+    {
+        Boolean AutoFlush { get; set; };
+        Windows.Storage.Streams.IInputStream BaseStream { get; };
+    }
+
+    [contract(ProcessForUWPContract, 6)]
+    enum CoProcessWindowStyle
+    {
+        Normal = 0,
+        Hidden,
+        Minimized,
+        Maximized
+    };
+
+    [contract(ProcessForUWPContract, 6)]
+    interface IProcessStartInfo
+    {
+        String[] Verbs { get; };
+        String Verb { get; set; };
+        Boolean UseShellExecute { get; set; };
+        String UserName { get; set; };
+        Boolean RedirectStandardOutput { get; set; };
+        Boolean RedirectStandardInput { get; set; };
+        Boolean RedirectStandardError { get; set; };
+        String PasswordInClearText { get; set; };
+        CoProcessWindowStyle WindowStyle { get; set; };
+        Boolean LoadUserProfile { get; set; };
+        String FileName { get; set; };
+        Boolean ErrorDialog { get; set; };
+        Windows.Foundation.Collections.IMap<String, String> Environment { get; };
+        String Domain { get; set; };
+        Boolean CreateNoWindow { get; set; };
+        String Arguments { get; set; };
+        String WorkingDirectory { get; set; };
+    }
+
+    [contract(ProcessForUWPContract, 6)]
+    struct CoDataReceivedEventArgs
+    {
+        String Data;
+    };
+
+    [contract(ProcessForUWPContract, 6)]
+    delegate void CoDataReceivedEventHandler(IInspectable sender, CoDataReceivedEventArgs e);
+
+    [uuid("C8B5B6C4-37A0-4A95-8A4B-851BA36FF684")]
+    [contract(ProcessForUWPContract, 6)]
+    interface IEventArgs
+    {
+    }
+
+    interface IComponent requires Windows.Foundation.IClosable, Windows.Foundation.IStringable
+    {
+        event Windows.Foundation.EventHandler<IEventArgs> Disposed;
+    }
+
+    [contract(ProcessForUWPContract, 6)]
+    interface IProcess requires IComponent
+    {
+        Boolean PriorityBoostEnabled { get; set; };
+        Int64 PeakWorkingSet64 { get; };
+        Int64 PeakVirtualMemorySize64 { get; };
+        Int64 PeakPagedMemorySize64 { get; };
+        Int64 PagedSystemMemorySize64 { get; };
+        Int64 PagedMemorySize64 { get; };
+        Int64 NonpagedSystemMemorySize64 { get; };
+        String MainWindowTitle { get; };
+        Int64 PrivateMemorySize64 { get; };
+        Windows.Foundation.TimeSpan PrivilegedProcessorTime { get; };
+        Int64 WorkingSet64 { get; };
+        Int64 VirtualMemorySize64 { get; };
+        Windows.Foundation.TimeSpan UserProcessorTime { get; };
+        Windows.Foundation.TimeSpan TotalProcessorTime { get; };
+        Windows.Foundation.DateTime StartTime { get; };
+        IStreamReader StandardOutput { get; };
+        IStreamWriter StandardInput { get; };
+        IStreamReader StandardError { get; };
+        Int32 SessionId { get; };
+        Boolean Responding { get; };
+        String ProcessName { get; };
+        IProcessStartInfo StartInfo { get; set; };
+        String MachineName { get; };
+        Boolean HasExited { get; };
+        Int32 HandleCount { get; };
+        Windows.Foundation.DateTime ExitTime { get; };
+        Int32 ExitCode { get; };
+        Boolean EnableRaisingEvents { get; set; };
+        Int32 BasePriority { get; };
+        Int32 Id { get; };
+
+        event Windows.Foundation.EventHandler<IEventArgs> Exited;
+        event CoDataReceivedEventHandler ErrorDataReceived;
+        event CoDataReceivedEventHandler OutputDataReceived;
+
+        void BeginErrorReadLine();
+        void BeginOutputReadLine();
+        void CancelErrorRead();
+        void CancelOutputRead();
+        void Close();
+        Boolean CloseMainWindow();
+        void Kill();
+        void Refresh();
+        Boolean Start();
+        void WaitForExit();
+        [default_overload]
+        Boolean WaitForExit(Int32 milliseconds);
+        [method_name("WaitForExitByTimeSpan")]
+        Boolean WaitForExit(Windows.Foundation.TimeSpan timeout);
+        Boolean WaitForInputIdle();
+        [default_overload]
+        Boolean WaitForInputIdle(Int32 milliseconds);
+        [method_name("WaitForInputIdleByTimeSpan")]
+        Boolean WaitForInputIdle(Windows.Foundation.TimeSpan timeout);
+    }
+
+    [contract(ProcessForUWPContract, 6)]
+    interface IProcessStatic
+    {
+        IProcess[] GetProcesses();
+        IProcess Start(IProcessStartInfo startInfo);
+    }
+
+    [contract(ProcessForUWPContract, 6)]
+    interface IFileStatic
+    {
+        void Copy(String sourceFileName, String destFileName);
+        void Copy(String sourceFileName, String destFileName, Boolean overwrite);
+        Boolean Exists(String path);
+    }
+
+    [contract(ProcessForUWPContract, 6)]
+    delegate Boolean IsAliveHandler();
+
+    [contract(ProcessForUWPContract, 6)]
+    interface ISetMonitor
+    {
+        void SetMonitor(IsAliveHandler handler, Windows.Foundation.TimeSpan period);
+    }
+
+    [contract(ProcessForUWPContract, 6)]
+    interface IServerProvider
+    {
+        Boolean IsServerRunning { get; };
+        IProcessStatic ProcessStatic { get; };
+        IFileStatic FileStatic { get; };
+    }
+
+    [uuid("8FBCF63F-E4F9-42EC-B70B-9B2C7E6673AF")]
+    [contract(ProcessForUWPContract, 6)]
+    interface IServerManager requires ISetMonitor, IServerProvider, Windows.Foundation.IClosable, Windows.Foundation.IStringable
+    {
+    }
+}

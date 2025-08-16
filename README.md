@@ -1,7 +1,7 @@
 # Process for UWP
 一种适用于 UWP 平台的 Process 方法
 
-基于 [@Silver-Fang](https://github.com/Silver-Fang "Silver-Fang") 的项目 ([Github](https://github.com/Silver-Fang/ProcessForUWP "ProcessForUWP"))
+曾基于 [@Silver-Fang](https://github.com/Silver-Fang "Silver-Fang") 的项目 ([Github](https://github.com/Silver-Fang/ProcessForUWP "ProcessForUWP"))
 
 [![LICENSE](https://img.shields.io/github/license/wherewhere/Process-For-UWP.svg?label=License&style=flat-square)](https://github.com/wherewhere/Process-For-UWP/blob/master/LICENSE "LICENSE")
 [![Issues](https://img.shields.io/github/issues/wherewhere/Process-For-UWP.svg?label=Issues&style=flat-square)](https://github.com/wherewhere/Process-For-UWP/issues "Issues")
@@ -19,74 +19,78 @@
   - [Star 数量统计](#star-数量统计)
 
 ## 简介
-本项目基于 [@Silver-Fang](https://github.com/Silver-Fang "Silver-Fang") 的项目 [ProcessForUWP](https://github.com/Silver-Fang/ProcessForUWP "ProcessForUWP")，与其不同的是，本项目利用了通信接口 `AppServiceConnection` 来进行应用间的通信，所以不用执行一次就弹一次 UAC，但是使用起来会比较麻烦。目前仍在开发当中，如果有兴趣欢迎加入。
+本项目基于 `OOP/COM` (`Out-of-Process`) 通信机制实现了 UWP 平台下的 `Process` 类，支持大部分常用方法和属性。目前仍在开发当中，如果有兴趣欢迎加入。
 
 ## 如何使用
-在你的解决方案中添加一个打包项目和一个空白桌面应用项目。在打包项目中引用你的 UWP 项目和桌面应用项目。在 UWP 项目中添加引用 `ProcessForUWP.UWP`，在桌面应用项目中引用 `ProcessForUWP.Desktop`。 
+在你的解决方案中添加一个打包项目和一个空白桌面应用项目。在打包项目中引用你的 UWP 项目和桌面应用项目。在 UWP 项目中引用 `ProcessForUWP.UWP`，在桌面应用项目中引用 `ProcessForUWP.Desktop`。 
 
 然后在打包项目的 `Package.appxmanifest` 中添加：
 ```xml
 <Package
     ...
-    xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10" 
-    IgnorableNamespaces="uap rescap desktop">
+    xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+    IgnorableNamespaces="... com">
     ...
     <Applications>
         <Application>
             ...
             <Extensions>
-                <uap:Extension Category="windows.appService">
-                    <uap:AppService Name="ProcessForUWP.Delegate"/>
-                </uap:Extension>
-                <desktop:Extension Category="windows.fullTrustProcess" Executable="【桌面应用项目的路径，如：ProcessForUWP.Demo.Delegate\ProcessForUWP.Demo.Delegate.exe】" />
+                <com:Extension Category="windows.comServer">
+                  <com:ComServer>
+                    <com:ExeServer
+                      Executable="【桌面应用项目的路径，如：ProcessForUWP.Demo.Delegate\ProcessForUWP.Demo.Delegate.exe】"
+                      DisplayName="ProcessForUWP Delegate"
+                      LaunchAndActivationPermission="O:SYG:SYD:(A;;11;;;WD)(A;;11;;;RC)(A;;11;;;AC)(A;;11;;;AN)S:P(ML;;NX;;;S-1-16-0)">
+                      <com:Class Id="【自行生成的唯一 GUID】" DisplayName="ProcessForUWP Delegate" />
+                    </com:ExeServer>
+                  </com:ComServer>
+                </com:Extension>
             </Extensions>
         </Application>
     </Applications>
     ...
 </Package>
 ```
-在 UWP 项目的 `App.xaml.cs` 中添加:
-```cs
-public sealed partial class App : Application
-{
-    ...
-    protected override async void OnLaunched(LaunchActivatedEventArgs e)
-    {
-        Communication.InitializeAppServiceConnection();
-        ...
-    }
 
-    /// <summary>
-    /// Handles connection requests to the app service
-    /// </summary>
-    /// <param name="args">Data about the background activation.</param>
-    protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)
-    {
-        base.OnBackgroundActivated(args);
-        Communication.OnBackgroundActivated(args);
-    }
-}
-```
 在桌面项目的 `Program.cs` 中添加：
 ```cs
 internal class Program
 {
     private static void Main(string[] args)
     {
-        Communication.InitializeAppServiceConnection();
         ...
-        EventWaitHandle WaitHandle = new AutoResetEvent(false);
-        _ = WaitHandle.WaitOne();
+        Factory.StartComServer(new Guid("【自行生成的唯一 GUID】"));
     }
     ...
 }
 ```
-在解决方案配置管理器中，三个项目的平台需保持一致，建议都设为x64。生成都要勾选。部署只需勾选打包项目，UWP 项目和桌面项目都不需部署。  
+
+在 UWP 项目中即可使用 `RemoteProcess` 类：
+```cs
+ProcessProjectionFactory.CLSID_IServerManager = new Guid("【自行生成的唯一 GUID】");
+IProcessStatic process = ProcessProjectionFactory.ServerManager.ProcessStatic;
+RemoteProcessStartInfo info = new("cmd")
+{
+    CreateNoWindow = true,
+    RedirectStandardError = true,
+    RedirectStandardInput = true,
+    RedirectStandardOutput = true,
+    UseShellExecute = false
+};
+RemoteProcess _process = process.Start(info);
+_process.OutputDataReceived += OnOutputDataReceived;
+_process.ErrorDataReceived += OnErrorDataReceived;
+_process.BeginErrorReadLine();
+_process.BeginOutputReadLine();
+```
+
+在解决方案配置管理器中，三个项目的平台需保持一致。生成都要勾选。部署只需勾选打包项目，UWP 项目和桌面项目都不需部署。  
 解决方案的启动项目应设为打包项目。  
 
 ## 注意事项
 1. 具体使用方法请查看 Demo
-2. 请不要在应用初始化过程中新建 Process 类，虽然我已经做了未加载完成的判断，但是这个判断可能会占用了线程导致应用初始化无法完成，如果真的要在应用初始化时新建 Process 类，请把它挪到别的线程去，或者提出 issue 帮助我解决这个问题。
+2. 请生成唯一的 UUID，避免与其他 COM 组件冲突
+3. 调用 `ProcessProjectionFactory.ServerManager` 前请确保已设置 `ProcessProjectionFactory.CLSID_IServerManager`
 
 ## Star 数量统计
-[![Star 数量统计](https://starchart.cc/wherewhere/ProcessForUWP.svg)](https://starchart.cc/wherewhere/ProcessForUWP "Star 数量统计")
+[![Star 数量统计](https://starchart.cc/wherewhere/ProcessForUWP.svg?variant=adaptive)](https://starchart.cc/wherewhere/ProcessForUWP "Star 数量统计")

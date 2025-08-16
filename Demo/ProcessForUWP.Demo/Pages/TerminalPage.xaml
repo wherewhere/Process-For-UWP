@@ -6,11 +6,41 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:ProcessForUWP.Demo.ViewModels"
     d:DataContext="{d:DesignInstance Type=viewmodels:TerminalViewModel}"
+    DataContext="{x:Bind Provider}"
     mc:Ignorable="d">
-    <ScrollViewer>
-        <TextBlock
-            Margin="16"
-            IsTextSelectionEnabled="True"
-            Text="{Binding OutputData}" />
-    </ScrollViewer>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ScrollViewer
+            Padding="4"
+            HorizontalScrollBarVisibility="Auto"
+            HorizontalScrollMode="Auto"
+            VerticalScrollBarVisibility="Auto"
+            VerticalScrollMode="Auto">
+            <RichTextBlock
+                x:Name="Message"
+                FontFamily="{ThemeResource CodeThemeFontFamily}"
+                IsTextSelectionEnabled="True" />
+        </ScrollViewer>
+        <Grid Grid.Row="2" Padding="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="4" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="Input" VerticalAlignment="Center" />
+            <Button
+                Grid.Column="2"
+                VerticalAlignment="Stretch"
+                Click="Button_Click"
+                Content="&#xE724;"
+                FontFamily="{ThemeResource SymbolThemeFontFamily}">
+                <Button.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="Enter" />
+                </Button.KeyboardAccelerators>
+            </Button>
+        </Grid>
+    </Grid>
 </Page>

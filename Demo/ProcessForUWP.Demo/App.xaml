@@ -12,6 +12,7 @@
             <!--  Add resources here  -->
             <CornerRadius x:Key="ControlCornerRadius">4</CornerRadius>
             <CornerRadius x:Key="OverlayCornerRadius">8</CornerRadius>
+            <FontFamily x:Key="CodeThemeFontFamily">Cascadia Code NF,Cascadia Code PL,Cascadia Code,Consolas,Courier New,Liberation Mono,SFMono-Regular,Menlo,Monaco,monospace</FontFamily>
             <FontFamily x:Key="SymbolThemeFontFamily">Segoe Fluent Icons,Segoe MDL2 Assets,Segoe UI Symbol</FontFamily>
         </ResourceDictionary>
     </Application.Resources>

@@ -3,18 +3,23 @@
   <PropertyGroup>
     <Authors>wherewhere</Authors>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <Copyright>Copyright © 2017 - 2023 wherewhere. All Rights Reserved.</Copyright>
+    <Copyright>Copyright © 2017 - 2025 wherewhere. All Rights Reserved.</Copyright>
     <Deterministic>true</Deterministic>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <LangVersion>latest</LangVersion>
     <IncludeSymbols>True</IncludeSymbols>
+    <LangVersion>latest</LangVersion>
+    <PackageIconUrl>https://raw.githubusercontent.com/wherewhere/Unicode-Style/main/logo.png</PackageIconUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/wherewhere/Process-For-UWP</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/wherewhere/Process-For-UWP/releases</PackageReleaseNotes>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageTags>Process;OOP;COM;WinRT</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/wherewhere/Process-For-UWP</RepositoryUrl>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Description>一种适用于 UWP 平台的 Process 方法
+本项目基于 OOP/COM (Out-of-Process) 通信机制实现了 UWP 平台下的 Process 类，支持大部分常用方法和属性。目前仍在开发当中，如果有兴趣欢迎加入。</Description>
   </PropertyGroup>
 
 </Project>

@@ -1,73 +1,89 @@
-﻿using Microsoft.Toolkit.Uwp;
+﻿using Microsoft.UI.Xaml.Controls;
+using ProcessForUWP.Core;
+using ProcessForUWP.Demo.Helpers;
 using ProcessForUWP.UWP;
-using System.ComponentModel;
-using System.Diagnostics;
+using System;
 using System.Threading.Tasks;
-using Windows.System;
+using Windows.Foundation;
+using Windows.UI;
+using Windows.UI.Core;
+using Windows.UI.Text;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Documents;
+using Windows.UI.Xaml.Media;
 
 namespace ProcessForUWP.Demo.ViewModels
 {
-    public class TerminalViewModel : INotifyPropertyChanged
+    public class TerminalViewModel(string path, TabViewItem tab)
     {
-        private readonly string _path;
-        private ProcessEx _process;
+        private IProcess _process;
 
-        public DispatcherQueue DispatcherQueue { get; private set; }
+        public CoreDispatcher Dispatcher => tab.Dispatcher;
 
-        private string _outputData = string.Empty;
-        public string OutputData
-        {
-            get => _outputData;
-            set
-            {
-                _outputData = value;
-                RaisePropertyChangedEvent();
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void RaisePropertyChangedEvent([System.Runtime.CompilerServices.CallerMemberName] string name = null)
-        {
-            if (name != null) { PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name)); }
-        }
-
-        public TerminalViewModel(string path, DispatcherQueue dispatcher)
-        {
-            _path = path;
-            DispatcherQueue = dispatcher;
-        }
+        public RichTextBlock Block { get; set; }
 
         public async Task Refresh()
         {
-            if (string.IsNullOrEmpty(OutputData))
+            if (_process == null)
             {
-                ProcessStartInfo info = new()
+                IProcessStatic process = ProcessProjectionFactory.ServerManager.ProcessStatic;
+                RemoteProcessStartInfo info = new(path)
                 {
-                    FileName = _path,
-                    UseShellExecute = false,
+                    CreateNoWindow = true,
                     RedirectStandardError = true,
+                    RedirectStandardInput = true,
                     RedirectStandardOutput = true,
-                    CreateNoWindow = true
+                    UseShellExecute = false
                 };
-                _process = await Task.Run(() => new ProcessEx { StartInfo = info });
-                _process.Start();
+                _process = process.Start(info);
+                _process.OutputDataReceived += OnOutputDataReceived;
+                _process.ErrorDataReceived += OnErrorDataReceived;
                 _process.BeginErrorReadLine();
                 _process.BeginOutputReadLine();
-                _process.OutputDataReceived += OnOutputDataReceived;
+                await Dispatcher.ResumeForegroundAsync();
+                tab.Header = _process.ProcessName;
             }
             else
             {
-                OutputData = string.Empty;
+                await Dispatcher.ResumeForegroundAsync();
+                Block.Blocks.Clear();
                 _process.Kill();
-                _process.Close();
                 _process.Start();
             }
         }
 
-        private void OnOutputDataReceived(ProcessEx sender, DataReceivedEventArgsEx e)
+        public IAsyncAction SendCommandAsync(string command) => _process.StandardInput.WriteLineAsync(command);
+
+        private async void OnOutputDataReceived(object sender, CoDataReceivedEventArgs e)
         {
-            _ = DispatcherQueue.EnqueueAsync(() => OutputData += $"{e.Data}\n");
+            await Dispatcher.ResumeForegroundAsync();
+            Block.Blocks.Add(new Paragraph
+            {
+                Inlines =
+                {
+                    new Run
+                    {
+                        Text = e.Data
+                    }
+                }
+            });
+        }
+
+        private async void OnErrorDataReceived(object sender, CoDataReceivedEventArgs e)
+        {
+            await Dispatcher.ResumeForegroundAsync();
+            Block.Blocks.Add(new Paragraph
+            {
+                Inlines =
+                {
+                    new Run
+                    {
+                        Text = e.Data,
+                        FontStyle = FontStyle.Italic,
+                        Foreground = new SolidColorBrush(Colors.Red)
+                    }
+                }
+            });
         }
     }
 }
