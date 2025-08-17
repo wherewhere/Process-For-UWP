@@ -16,7 +16,7 @@ namespace ProcessForUWP.Desktop
         public partial IAsyncAction FlushAsync();
         public partial void Write(ulong value);
         public partial void Write(uint value);
-        public partial void Write(string format, object[] args);
+        public partial void Write(string format, params object[] args);
         public partial void Write(string format, object arg0, object arg1, object arg2);
         public partial void Write(string format, object arg0, object arg1);
         public partial void Write(string format, object arg0);
@@ -37,7 +37,7 @@ namespace ProcessForUWP.Desktop
         public partial void WriteLine();
         public partial void WriteLine(ulong value);
         public partial void WriteLine(uint value);
-        public partial void WriteLine(string format, object[] args);
+        public partial void WriteLine(string format, params object[] args);
         public partial void WriteLine(string format, object arg0, object arg1, object arg2);
         public partial void WriteLine(string format, object arg0, object arg1);
         public partial void WriteLine(string format, object arg0);
@@ -61,7 +61,7 @@ namespace ProcessForUWP.Desktop
         public partial IAsyncAction DisposeAsync();
 #else
         /// <inheritdoc cref="TextWriterEx.DisposeAsync(TextWriter)"/>
-        public IAsyncAction DisposeAsync() => target.DisposeAsync();
+        public IAsyncAction DisposeAsync() => System.WindowsRuntimeSystemExtensions.AsAsyncAction(target.DisposeAsync());
 #endif
     }
 }

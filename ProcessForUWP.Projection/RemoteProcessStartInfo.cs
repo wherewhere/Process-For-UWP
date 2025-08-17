@@ -30,15 +30,6 @@ namespace ProcessForUWP.Core
         public partial bool RedirectStandardInput { get; set; }
         public partial bool RedirectStandardError { get; set; }
 
-#if !NETFRAMEWORK || NET461_OR_GREATER
-        public partial string? PasswordInClearText { get; set; }
-#else
-        /// <summary>
-        /// Gets or sets the user password in clear text to use when starting the process.
-        /// </summary>
-        public string? PasswordInClearText { get; set; }
-#endif
-
         /// <inheritdoc cref="ProcessStartInfo.WindowStyle"/>
         public CoProcessWindowStyle WindowStyle
         {
@@ -107,9 +98,6 @@ namespace ProcessForUWP.Core
                     RedirectStandardOutput = wrapper.RedirectStandardOutput,
                     RedirectStandardInput = wrapper.RedirectStandardInput,
                     RedirectStandardError = wrapper.RedirectStandardError,
-#if !NETFRAMEWORK || NET461_OR_GREATER
-                    PasswordInClearText = wrapper.PasswordInClearText,
-#endif
                     WindowStyle = (ProcessWindowStyle)wrapper.WindowStyle,
                     LoadUserProfile = wrapper.LoadUserProfile,
                     FileName = wrapper.FileName,
@@ -180,11 +168,6 @@ namespace ProcessForUWP.Core
         /// Gets or sets a value that indicates whether the error output of an application is written to the <see cref="IProcess.StandardError"/> stream.
         /// </summary>
         public bool RedirectStandardError { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user password in clear text to use when starting the process.
-        /// </summary>
-        public string? PasswordInClearText { get; set; }
 
         /// <summary>
         /// Gets or sets the window state to use when the process is started.

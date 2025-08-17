@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel;
 using System.IO;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using Windows.Foundation;
 
 namespace ProcessForUWP.Desktop.Polyfills
 {
@@ -19,11 +17,7 @@ namespace ProcessForUWP.Desktop.Polyfills
             /// Asynchronously releases all resources used by the <see cref="TextWriter"/> object.
             /// </summary>
             /// <returns>A task that represents the asynchronous dispose operation.</returns>
-            public IAsyncAction DisposeAsync() => AsyncInfo.Run(_ =>
-            {
-                writer.Dispose();
-                return Task.CompletedTask;
-            });
+            public Task DisposeAsync() => Task.Run(writer.Dispose);
         }
     }
 }

@@ -25,6 +25,7 @@
     <PolySharpIncludeGeneratedTypes>
       System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute;
       System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute;
+      System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
       System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
     </PolySharpIncludeGeneratedTypes>
   </PropertyGroup>

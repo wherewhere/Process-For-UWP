@@ -155,7 +155,6 @@ namespace ProcessForUWP.Core
         Boolean RedirectStandardOutput { get; set; };
         Boolean RedirectStandardInput { get; set; };
         Boolean RedirectStandardError { get; set; };
-        String PasswordInClearText { get; set; };
         CoProcessWindowStyle WindowStyle { get; set; };
         Boolean LoadUserProfile { get; set; };
         String FileName { get; set; };
@@ -253,12 +252,85 @@ namespace ProcessForUWP.Core
         IProcess Start(IProcessStartInfo startInfo);
     }
 
+    [flags]
+    [contract(ProcessForUWPContract, 6)]
+    enum CoFileAttributes
+    {
+        None = 0x0000,
+        ReadOnly = 0x0001,
+        Hidden = 0x0002,
+        System = 0x0004,
+        Directory = 0x0010,
+        Archive = 0x0020,
+        Device = 0x0040,
+        Normal = 0x0080,
+        Temporary = 0x0100,
+        SparseFile = 0x0200,
+        ReparsePoint = 0x0400,
+        Compressed = 0x0800,
+        Offline = 0x1000,
+        NotContentIndexed = 0x2000,
+        Encrypted = 0x4000,
+        IntegrityStream = 0x8000,
+        NoScrubData = 0x20000
+    };
+
     [contract(ProcessForUWPContract, 6)]
     interface IFileStatic
     {
         void Copy(String sourceFileName, String destFileName);
         void Copy(String sourceFileName, String destFileName, Boolean overwrite);
         Boolean Exists(String path);
+        CoFileAttributes GetAttributes(String path);
+        Windows.Foundation.DateTime GetCreationTime(String path);
+        Windows.Foundation.DateTime GetLastAccessTime(String path);
+        Windows.Foundation.DateTime GetLastWriteTime(String path);
+        Windows.Storage.Streams.IOutputStream OpenRead(String path);
+        IStreamReader OpenText(String path);
+        UInt8[] ReadAllBytes(String path);
+        Windows.Foundation.IAsyncOperation<Windows.Storage.Streams.IBuffer> ReadAllBytesAsync(String path);
+        String[] ReadAllLines(String path);
+        Windows.Foundation.IAsyncOperation< Windows.Foundation.Collections.IVectorView<String> > ReadAllLinesAsync(String path);
+        String ReadAllText(String path);
+        Windows.Foundation.IAsyncOperation<String> ReadAllTextAsync(String path);
+        Boolean CreateHardLink(String path, String pathToTarget);
+        Boolean CopyDiscretionaryAccessControlList(String sourceFileName, String destFileName);
+    }
+
+    enum CoSearchOption 
+    {
+        TopDirectoryOnly = 0,
+        AllDirectories
+    };
+
+    [contract(ProcessForUWPContract, 6)]
+    interface IDirectoryStatic
+    {
+        Windows.Foundation.Collections.IIterable<String> EnumerateDirectories(String path);
+        Windows.Foundation.Collections.IIterable<String> EnumerateDirectories(String path, String searchPattern);
+        Windows.Foundation.Collections.IIterable<String> EnumerateDirectories(String path, String searchPattern, CoSearchOption searchOption);
+        Windows.Foundation.Collections.IIterable<String> EnumerateFiles(String path);
+        Windows.Foundation.Collections.IIterable<String> EnumerateFiles(String path, String searchPattern);
+        Windows.Foundation.Collections.IIterable<String> EnumerateFiles(String path, String searchPattern, CoSearchOption searchOption);
+        Windows.Foundation.Collections.IIterable<String> EnumerateFileSystemEntries(String path);
+        Windows.Foundation.Collections.IIterable<String> EnumerateFileSystemEntries(String path, String searchPattern);
+        Windows.Foundation.Collections.IIterable<String> EnumerateFileSystemEntries(String path, String searchPattern, CoSearchOption searchOption);
+        Boolean Exists(String path);
+        Windows.Foundation.DateTime GetCreationTime(String path);
+        Windows.Foundation.DateTime GetLastAccessTime(String path);
+        Windows.Foundation.DateTime GetLastWriteTime(String path);
+        String GetCurrentDirectory();
+        String GetDirectoryRoot(String path);
+        String[] GetDirectories(String path);
+        String[] GetDirectories(String path, String searchPattern);
+        String[] GetDirectories(String path, String searchPattern, CoSearchOption searchOption);
+        String[] GetFiles(String path);
+        String[] GetFiles(String path, String searchPattern);
+        String[] GetFiles(String path, String searchPattern, CoSearchOption searchOption);
+        String[] GetFileSystemEntries(String path);
+        String[] GetFileSystemEntries(String path, String searchPattern);
+        String[] GetFileSystemEntries(String path, String searchPattern, CoSearchOption searchOption);
+        String[] GetLogicalDrives();
     }
 
     [contract(ProcessForUWPContract, 6)]
