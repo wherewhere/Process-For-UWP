@@ -28,7 +28,8 @@ namespace ProcessForUWP.Demo
 
             Suspending += OnSuspending;
             UnhandledException += Application_UnhandledException;
-            ProcessProjectionFactory.CLSID_IServerManager = new Guid("89575E89-722D-4D0A-9BE7-0AB808C9C4BB");
+            ProcessProjectionFactory.CLSID = new Guid("89575E89-722D-4D0A-9BE7-0AB808C9C4BB");
+            ProcessProjectionFactory.ActivatableClassID = "ProcessForUWP.Delegate";
 
             if (ApiInformation.IsEnumNamedValuePresent("Windows.UI.Xaml.FocusVisualKind", "Reveal"))
             {

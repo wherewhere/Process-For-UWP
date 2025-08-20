@@ -61,6 +61,7 @@
           <com:ComServer>
             <com:ExeServer
               Executable="ProcessForUWP.Demo.Delegate\ProcessForUWP.Demo.Delegate.exe"
+              Arguments="-RegisterProcessAsComServer"
               DisplayName="ProcessForUWP Delegate"
               LaunchAndActivationPermission="O:SYG:SYD:(A;;11;;;WD)(A;;11;;;RC)(A;;11;;;AC)(A;;11;;;AN)S:P(ML;;NX;;;S-1-16-0)">
               <com:Class Id="89575E89-722D-4D0A-9BE7-0AB808C9C4BB" DisplayName="ProcessForUWP Delegate" />
@@ -70,6 +71,17 @@
       </Extensions>
     </Application>
   </Applications>
+
+  <Extensions>
+    <Extension Category="windows.activatableClass.outOfProcessServer">
+      <OutOfProcessServer ServerName="wherewhere.ProcessForUWP.Delegate">
+        <Path>ProcessForUWP.Demo.Delegate\ProcessForUWP.Demo.Delegate.exe</Path>
+        <Arguments>-RegisterProcessAsWinRTServer</Arguments>
+        <Instancing>singleInstance</Instancing>
+        <ActivatableClass ActivatableClassId="ProcessForUWP.Delegate" />
+      </OutOfProcessServer>
+    </Extension>
+  </Extensions>
 
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />

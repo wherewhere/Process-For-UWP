@@ -68,16 +68,16 @@ namespace ProcessForUWP.Desktop
                 GC.SuppressFinalize(this);
                 if (--RefCount == 0)
                 {
-                    _ = CheckComRefAsync();
+                    _ = CheckReferenceAsync();
                 }
             }
         }
 
         /// <summary>
-        /// Checks if the COM reference count is zero and invokes the server manager destructed event.
+        /// Checks if the reference count is zero and invokes the server manager destructed event.
         /// </summary>
         /// <returns><see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task CheckComRefAsync()
+        public static async Task CheckReferenceAsync()
         {
             if (Timeout > 0) { await Task.Delay(Timeout); }
             if (RefCount == 0) { ServerManagerDestructed?.Invoke(); }

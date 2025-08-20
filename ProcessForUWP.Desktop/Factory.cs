@@ -1,7 +1,17 @@
-﻿using System;
+﻿using ProcessForUWP.Core;
+using System;
 using System.Runtime.InteropServices;
 using System.Threading;
-using ProcessForUWP.Core;
+
+#if NET
+using IActivationFactory = WinRT.Interop.IActivationFactory;
+#else
+using IActivationFactory = System.Runtime.InteropServices.WindowsRuntime.IActivationFactory;
+#endif
+
+#if !NET7_0_OR_GREATER
+using unsafe DllGetActivationFactoryPointer = delegate* unmanaged[Stdcall]<nint, out nint, nint>;
+#endif
 
 namespace ProcessForUWP.Desktop
 {
@@ -13,7 +23,7 @@ namespace ProcessForUWP.Desktop
 #if NET8_0_OR_GREATER
     [System.Runtime.InteropServices.Marshalling.GeneratedComClass]
 #endif
-    public partial class ServerManagerFactory(Guid clsid) : IClassFactory
+    public partial class ServerManagerClassFactory(Guid clsid) : IClassFactory
     {
         /// <summary>
         /// The EXE code that creates and manages objects of this class runs on same machine but is loaded in a separate process space.
@@ -116,7 +126,7 @@ namespace ProcessForUWP.Desktop
         private static partial int CoRegisterClassObject(in Guid rclsid, IClassFactory pUnk, uint dwClsContext, int flags, out uint lpdwRegister);
 #else
         [DllImport("api-ms-win-core-com-l1-1-0.dll", ExactSpelling = true)]
-        private static extern int CoRegisterClassObject([In] in Guid rclsid, [In] ServerManagerFactory pUnk, [In] uint dwClsContext, [In] int flags, [Out] out uint lpdwRegister);
+        private static extern int CoRegisterClassObject([In] in Guid rclsid, [In] ServerManagerClassFactory pUnk, [In] uint dwClsContext, [In] int flags, [Out] out uint lpdwRegister);
 #endif
 
         /// <summary>
@@ -134,10 +144,173 @@ namespace ProcessForUWP.Desktop
     }
 
     /// <summary>
+    /// Factory class for creating instances of the <see cref="IServerManager"/> WinRT interface.
+    /// </summary>
+    /// <param name="classId">The activatable class ID of the <see cref="IServerManager"/> WinRT interface.</param>
+    [ComVisible(true)]
+    public partial class ServerManagerActivationFactory(string classId) : IActivationFactory
+    {
+        private const nint S_OK = 0;
+        private const nint E_INVALIDARG = unchecked((int)0x80070057);
+
+        private nint cookie;
+
+        /// <inheritdoc/>
+#if NET
+        public nint ActivateInstance() => WinRT.MarshalInspectable<IServerManager>.FromManaged(new ServerManager());
+#else
+        public object ActivateInstance() => new ServerManager();
+#endif
+
+        /// <inheritdoc cref="DllGetActivationFactory"/>
+#if NET
+        private nint GetActivationFactory(nint activatableClassId, out nint factory)
+#else
+        private unsafe nint GetActivationFactory(nint activatableClassId, out IActivationFactory? factory)
+#endif
+        {
+            try
+            {
+#if NET
+                string _classId = WinRT.MarshalString.FromAbi(activatableClassId);
+                if (_classId == classId)
+                {
+                    factory = WinRT.MarshalInterface<IActivationFactory>.FromManaged(this);
+                    return S_OK;
+                }
+#else
+                char* ptr = WindowsGetStringRawBuffer(activatableClassId, out uint length);
+                string _classId = new(ptr, 0, (int)length);
+                if (_classId == classId)
+                {
+                    factory = this;
+                    return S_OK;
+                }
+#endif
+                factory = default;
+                return E_INVALIDARG;
+            }
+            catch (Exception ex)
+            {
+                factory = default;
+#if NET
+                return WinRT.ExceptionHelpers.GetHRForException(ex);
+#else
+                return Marshal.GetHRForException(ex);
+#endif
+            }
+        }
+
+        /// <summary>
+        /// Registers the activation factory with the Windows Runtime so other applications can connect to it.
+        /// </summary>
+        public void RegisterActivationFactory()
+        {
+#if NET
+            nint activatableClassId = WinRT.MarshalString.FromManaged(classId);
+            int hresult;
+#else
+            int hresult = WindowsCreateString(classId, (uint)classId.Length, out nint activatableClassId);
+            if (hresult < 0)
+            {
+                Marshal.ThrowExceptionForHR(hresult);
+            }
+#endif
+            hresult = RoRegisterActivationFactories([activatableClassId], [GetActivationFactory], 1, out cookie);
+            if (hresult < 0)
+            {
+                Marshal.ThrowExceptionForHR(hresult);
+            }
+        }
+
+        /// <summary>
+        /// Revokes the activation factory previously registered with the Windows Runtime.
+        /// </summary>
+        public void RevokeActivationFactory() => RoRevokeActivationFactories(cookie);
+
+#if !NET7_0_OR_GREATER
+        /// <summary>
+        /// Creates a new HSTRING based on the specified source string.
+        /// </summary>
+        /// <param name="sourceString">A null-terminated string to use as the source for the new HSTRING. To create a new, empty, or <see langword="null"/> string, pass <see langword="null"/> for sourceString and 0 for <paramref name="length"/>.</param>
+        /// <param name="length">The length of <paramref name="sourceString"/>, in Unicode characters. Must be 0 if <paramref name="sourceString"/> is <see langword="null"/>.</param>
+        /// <param name="string">A pointer to the newly created HSTRING, or NULL if an error occurs. Any existing content in string is overwritten. The HSTRING is a standard handle type.</param>
+        /// <returns>This function can return one of these values.</returns>
+        [DllImport("api-ms-win-core-winrt-string-l1-1-0.dll", ExactSpelling = true)]
+        private static extern int WindowsCreateString([In, Optional][MarshalAs(UnmanagedType.LPWStr)] string sourceString, [In] uint length, [Out] out nint @string);
+#endif
+
+#if !NET7_0_OR_GREATER
+        [DllImport("api-ms-win-core-winrt-string-l1-1-0.dll", CallingConvention = CallingConvention.StdCall)]
+        private static extern unsafe char* WindowsGetStringRawBuffer([In, Optional] nint hstring, [Out, Optional] out uint length);
+#endif
+
+        /// <summary>
+        /// Retrieves the activation factory from a DLL that contains activatable Windows Runtime classes.
+        /// </summary>
+        /// <param name="activatableClassId">The class identifier that is associated with an activatable runtime class.</param>
+        /// <param name="factory">A pointer to the activation factory that corresponds with the class specified by <paramref name="activatableClassId"/>.</param>
+        /// <returns>This entry point can return one of these values.</returns>
+#if NET
+        private delegate nint DllGetActivationFactory([In] nint activatableClassId, [Out] out nint factory);
+#else
+        private delegate nint DllGetActivationFactory([In] nint activatableClassId, [Out] out IActivationFactory? factory);
+#endif
+
+        /// <summary>
+        /// Registers an array out-of-process activation factories for a Windows Runtime exe server.
+        /// </summary>
+        /// <param name="activatableClassIds">An array of class identifiers that are associated with activatable runtime classes.</param>
+        /// <param name="activationFactoryCallbacks">An array of callback functions that you can use to retrieve the activation factories that correspond with <paramref name="activatableClassIds"/>.</param>
+        /// <param name="count">The number of items in the <paramref name="activatableClassIds"/> and <paramref name="activationFactoryCallbacks"/> arrays.</param>
+        /// <param name="cookie">A cookie that identifies the registered factories.</param>
+        /// <returns>This function can return one of these values.</returns>
+#if NET7_0_OR_GREATER
+        [LibraryImport("api-ms-win-core-winrt-l1-1-0.dll")]
+        private unsafe static partial int RoRegisterActivationFactories([In] nint[] activatableClassIds, [In] DllGetActivationFactory[] activationFactoryCallbacks, uint count, out nint cookie);
+#else
+        private static unsafe int RoRegisterActivationFactories(nint[] activatableClassIds, DllGetActivationFactory[] activationFactoryCallbacks, uint count, out nint cookie)
+        {
+            fixed (nint* __cookie_native = &cookie)
+            {
+                fixed (nint* __activatableClassIds_native = activatableClassIds)
+                {
+                    DllGetActivationFactoryPointer* __activationFactoryCallbacks_native = (DllGetActivationFactoryPointer*)Marshal.AllocHGlobal(sizeof(DllGetActivationFactoryPointer*) * activationFactoryCallbacks.Length);
+                    for (int i = 0; i < activationFactoryCallbacks.Length; i++)
+                    {
+                        __activationFactoryCallbacks_native[i] = (DllGetActivationFactoryPointer)Marshal.GetFunctionPointerForDelegate(activationFactoryCallbacks[i]);
+                    }
+                    return RoRegisterActivationFactories(__activatableClassIds_native, __activationFactoryCallbacks_native, (uint)activationFactoryCallbacks.Length, __cookie_native);
+                }
+            }
+            // Local P/Invoke
+            [DllImport("api-ms-win-core-winrt-l1-1-0.dll", ExactSpelling = true)]
+            static extern unsafe int RoRegisterActivationFactories([In] nint* __activatableClassIds_native, [In] DllGetActivationFactoryPointer* __activationFactoryCallbacks_native, [In] uint __count_native, [Out] nint* __cookie_native);
+        }
+#endif
+
+        /// <summary>
+        /// Removes an array of registered activation factories from the Windows Runtime.
+        /// </summary>
+#if NET7_0_OR_GREATER
+        [LibraryImport("api-ms-win-core-winrt-l1-1-0.dll")]
+        private static partial void RoRevokeActivationFactories(nint cookie);
+#else
+        [DllImport("api-ms-win-core-winrt-l1-1-0.dll", ExactSpelling = true)]
+        private static extern void RoRevokeActivationFactories([In] nint cookie);
+#endif
+    }
+
+    /// <summary>
     /// Provides methods and constants for COM class object registration.
     /// </summary>
-    public static class Factory
+    public static partial class Factory
     {
+        /// <summary>
+        /// Initializes the thread for multi-threaded concurrency. The current thread is initialized in the MTA.
+        /// </summary>
+        private const int RO_INIT_MULTITHREADED = 1;
+
         /// <summary>
         /// The event that signals when the COM server should exit.
         /// </summary>
@@ -152,13 +325,44 @@ namespace ProcessForUWP.Desktop
             comServerExitEvent = new ManualResetEventSlim(false);
             comServerExitEvent.Reset();
             ServerManager.ServerManagerDestructed += comServerExitEvent.Set;
-            ServerManagerFactory factory = new(clsid);
+            ServerManagerClassFactory factory = new(clsid);
             factory.RegisterClassObject();
-            _ = ServerManager.CheckComRefAsync();
+            _ = ServerManager.CheckReferenceAsync();
             comServerExitEvent.Wait();
             factory.RevokeClassObject();
             comServerExitEvent = null;
         }
+
+        /// <summary>
+        /// Starts the WinRT server with the specified activatable class ID and waits for it to exit.
+        /// </summary>
+        /// <param name="activatableClassId">The activatable class ID to be registered.</param>
+        public static unsafe void StartWinRTServer(string activatableClassId)
+        {
+            _ = RoInitialize(RO_INIT_MULTITHREADED);
+            comServerExitEvent = new ManualResetEventSlim(false);
+            comServerExitEvent.Reset();
+            ServerManager.ServerManagerDestructed += comServerExitEvent.Set;
+            ServerManagerActivationFactory factory = new(activatableClassId);
+            factory.RegisterActivationFactory();
+            _ = ServerManager.CheckReferenceAsync();
+            comServerExitEvent.Wait();
+            factory.RevokeActivationFactory();
+            comServerExitEvent = null;
+        }
+
+        /// <summary>
+        /// Initializes the Windows Runtime on the current thread with the specified concurrency model.
+        /// </summary>
+        /// <param name="initType">The concurrency model for the thread. The default is <see cref="RO_INIT_MULTITHREADED"/>.</param>
+        /// <returns>This function can return the standard return values E_INVALIDARG, E_OUTOFMEMORY, and E_UNEXPECTED, as well as the following values.</returns>
+#if NET7_0_OR_GREATER
+        [LibraryImport("api-ms-win-core-winrt-l1-1-0.dll")]
+        private static partial int RoInitialize(int initType);
+#else
+        [DllImport("api-ms-win-core-winrt-l1-1-0.dll", ExactSpelling = true)]
+        private static extern int RoInitialize([In] int initType);
+#endif
     }
 
     /// <summary>

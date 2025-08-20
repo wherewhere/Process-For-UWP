@@ -24,50 +24,96 @@
 ## 如何使用
 在你的解决方案中添加一个打包项目和一个空白桌面应用项目。在打包项目中引用你的 UWP 项目和桌面应用项目。在 UWP 项目中引用 `ProcessForUWP.UWP`，在桌面应用项目中引用 `ProcessForUWP.Desktop`。 
 
-然后在打包项目的 `Package.appxmanifest` 中添加：
-```xml
-<Package
+- OOP/COM 通信
+
+  在打包项目的 `Package.appxmanifest` 中添加：
+  ```xml
+  <Package
     ...
     xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
     IgnorableNamespaces="... com">
     ...
     <Applications>
-        <Application>
-            ...
-            <Extensions>
-                <com:Extension Category="windows.comServer">
-                  <com:ComServer>
-                    <com:ExeServer
-                      Executable="【桌面应用项目的路径，如：ProcessForUWP.Demo.Delegate\ProcessForUWP.Demo.Delegate.exe】"
-                      DisplayName="ProcessForUWP Delegate"
-                      LaunchAndActivationPermission="O:SYG:SYD:(A;;11;;;WD)(A;;11;;;RC)(A;;11;;;AC)(A;;11;;;AN)S:P(ML;;NX;;;S-1-16-0)">
-                      <com:Class Id="【自行生成的唯一 GUID】" DisplayName="ProcessForUWP Delegate" />
-                    </com:ExeServer>
-                  </com:ComServer>
-                </com:Extension>
-            </Extensions>
-        </Application>
+      <Application>
+        ...
+        <Extensions>
+          ...
+          <com:Extension Category="windows.comServer">
+            <com:ComServer>
+              <com:ExeServer
+                Executable="【桌面应用项目的路径，如：ProcessForUWP.Demo.Delegate\ProcessForUWP.Demo.Delegate.exe】"
+                DisplayName="ProcessForUWP Delegate"
+                LaunchAndActivationPermission="O:SYG:SYD:(A;;11;;;WD)(A;;11;;;RC)(A;;11;;;AC)(A;;11;;;AN)S:P(ML;;NX;;;S-1-16-0)">
+                <com:Class Id="【自行生成的唯一 GUID】" DisplayName="ProcessForUWP Delegate" />
+              </com:ExeServer>
+            </com:ComServer>
+          </com:Extension>
+        </Extensions>
+      </Application>
     </Applications>
     ...
-</Package>
-```
+  </Package>
+  ```
 
-在桌面项目的 `Program.cs` 中添加：
-```cs
-internal class Program
-{
-    private static void Main(string[] args)
-    {
-        ...
-        Factory.StartComServer(new Guid("【自行生成的唯一 GUID】"));
-    }
+  在桌面项目的 `Program.cs` 中添加：
+  ```cs
+  internal class Program
+  {
+      private static void Main(string[] args)
+      {
+          ...
+          Factory.StartComServer(new Guid("【自行生成的唯一 GUID】"));
+      }
+      ...
+  }
+  ```
+
+  在 UWP 项目中使用前添加：
+  ```cs
+  ProcessProjectionFactory.CLSID = new Guid("【自行生成的唯一 GUID】");
+  ```
+
+- WinRT/COM 通信 (不支持沙盒与沙盒外通信)
+
+  在打包项目的 `Package.appxmanifest` 中添加：
+  ```xml
+  <Package ...>
     ...
-}
-```
+    <Extensions>
+      ...
+      <Extension Category="windows.activatableClass.outOfProcessServer">
+        <OutOfProcessServer ServerName="wherewhere.ProcessForUWP.Delegate">
+          <Path>【桌面应用项目的路径，如：ProcessForUWP.Demo.Delegate\ProcessForUWP.Demo.Delegate.exe】</Path>
+          <Instancing>singleInstance</Instancing>
+          <ActivatableClass ActivatableClassId="【自行选择唯一的字符串 ID】" />
+        </OutOfProcessServer>
+      </Extension>
+    </Extensions>
+    ...
+  </Package>
+  ```
+
+  在桌面项目的 `Program.cs` 中添加：
+  ```cs
+  internal class Program
+  {
+      private static void Main(string[] args)
+      {
+          ...
+          Factory.StartWinRTServer(new Guid("【自行选择唯一的字符串 ID】"));
+      }
+      ...
+  }
+  ```
+
+  在 UWP 项目中使用前添加：
+  ```cs
+  ProcessProjectionFactory.DefaultType = RPCType.WinRT;
+  ProcessProjectionFactory.ActivatableClassID = new Guid("【自行选择唯一的字符串 ID】");
+  ```
 
 在 UWP 项目中即可使用 `RemoteProcess` 类：
 ```cs
-ProcessProjectionFactory.CLSID_IServerManager = new Guid("【自行生成的唯一 GUID】");
 IProcessStatic process = ProcessProjectionFactory.ServerManager.ProcessStatic;
 RemoteProcessStartInfo info = new("cmd")
 {
@@ -90,7 +136,9 @@ _process.BeginOutputReadLine();
 ## 注意事项
 1. 具体使用方法请查看 Demo
 2. 请生成唯一的 UUID，避免与其他 COM 组件冲突
-3. 调用 `ProcessProjectionFactory.ServerManager` 前请确保已设置 `ProcessProjectionFactory.CLSID_IServerManager`
+3. 调用 `ProcessProjectionFactory.ServerManager` 前请确保已设置 `ProcessProjectionFactory.CLSID` 或 `ProcessProjectionFactory.ActivatableClassID`
+4. OOP/WinRT 不支持沙盒与沙盒外通信，设置 `uap5:RunFullTrust="true"` 将只能与全权限应用通信
+5. OOP/WinRT 服务器暂时不支持 `.NET Framework`，猜测为在 AppContainer 内会运行在 `.NET Core 5.0` 上
 
 ## Star 数量统计
 [![Star 数量统计](https://starchart.cc/wherewhere/ProcessForUWP.svg?variant=adaptive)](https://starchart.cc/wherewhere/ProcessForUWP "Star 数量统计")
