@@ -1,13 +1,9 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using ProcessForUWP.Core;
 using ProcessForUWP.Demo.Helpers;
-using ProcessForUWP.UWP;
 using System;
-using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using Windows.Foundation;
-using Windows.Storage;
 using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Text;

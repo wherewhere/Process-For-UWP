@@ -1,0 +1,19 @@
+namespace ProcessForUWP.Demo.Projection
+{
+    enum RPCType
+    {
+        COM,
+        WinRT
+    };
+
+    [default_interface]
+    [contract(ProcessForUWP.Core.ProcessForUWPContract, 6)]
+    static runtimeclass ProcessProjectionFactory
+    {
+        static RPCType DefaultType { get; set; };
+        static Windows.Foundation.IReference<Guid> CLSID { get; set; };
+        static String ActivatableClassID { get; set; };
+        static Windows.Foundation.TimeSpan Timeout { get; set; };
+        static ProcessForUWP.Core.IServerManager ServerManager { get; };
+    }
+}

@@ -48,6 +48,7 @@
     <DefaultLanguage>zh-CN</DefaultLanguage>
     <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
     <NoWarn>$(NoWarn);NU1702</NoWarn>
+    <AssetTargetFallback>$(AssetTargetFallback);native</AssetTargetFallback>
     <EntryPointProjectUniqueName>..\ProcessForUWP.Demo\ProcessForUWP.Demo.csproj</EntryPointProjectUniqueName>
   </PropertyGroup>
   <ItemGroup>

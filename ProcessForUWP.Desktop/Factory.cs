@@ -2,6 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 #if NET
 using IActivationFactory = WinRT.Interop.IActivationFactory;
@@ -312,43 +313,107 @@ namespace ProcessForUWP.Desktop
         private const int RO_INIT_MULTITHREADED = 1;
 
         /// <summary>
-        /// The event that signals when the COM server should exit.
-        /// </summary>
-        private static ManualResetEventSlim? comServerExitEvent;
-
-        /// <summary>
         /// Starts the COM server with the specified CLSID and waits for it to exit.
         /// </summary>
         /// <param name="clsid">The CLSID to be registered.</param>
         public static void StartComServer(in Guid clsid)
         {
-            comServerExitEvent = new ManualResetEventSlim(false);
+            ManualResetEventSlim comServerExitEvent = new(false);
             comServerExitEvent.Reset();
             ServerManager.ServerManagerDestructed += comServerExitEvent.Set;
             ServerManagerClassFactory factory = new(clsid);
             factory.RegisterClassObject();
             _ = ServerManager.CheckReferenceAsync();
             comServerExitEvent.Wait();
+            ServerManager.ServerManagerDestructed -= comServerExitEvent.Set;
             factory.RevokeClassObject();
-            comServerExitEvent = null;
+        }
+
+        /// <summary>
+        /// Starts the COM server with the specified CLSID and waits for it to exit asynchronously.
+        /// </summary>
+        /// <param name="clsid">The CLSID to be registered.</param>
+        /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public static Task StartComServerAsync(in Guid clsid, CancellationToken cancellationToken = default)
+        {
+            TaskCompletionSource source = new();
+            ServerManagerClassFactory factory = new(clsid);
+            ServerManager.ServerManagerDestructed += OnServerManagerDestructed;
+            CancellationTokenRegistration registration = cancellationToken.Register(OnServerManagerDestructed);
+            void OnServerManagerDestructed()
+            {
+                try
+                {
+                    factory.RevokeClassObject();
+                    ServerManager.ServerManagerDestructed -= OnServerManagerDestructed;
+                    _ = source.TrySetResult();
+                }
+                catch (Exception ex)
+                {
+                    _ = source.TrySetException(ex);
+                }
+            }
+            factory.RegisterClassObject();
+            _ = ServerManager.CheckReferenceAsync();
+#if COMP_NETSTANDARD2_1
+            return source.Task.ContinueWith(_ => registration.DisposeAsync().AsTask(), default(CancellationToken)).Unwrap();
+#else
+            return source.Task.ContinueWith(_ => registration.Dispose(), default(CancellationToken));
+#endif
         }
 
         /// <summary>
         /// Starts the WinRT server with the specified activatable class ID and waits for it to exit.
         /// </summary>
         /// <param name="activatableClassId">The activatable class ID to be registered.</param>
-        public static unsafe void StartWinRTServer(string activatableClassId)
+        public static void StartWinRTServer(string activatableClassId)
         {
             _ = RoInitialize(RO_INIT_MULTITHREADED);
-            comServerExitEvent = new ManualResetEventSlim(false);
+            ManualResetEventSlim comServerExitEvent = new(false);
             comServerExitEvent.Reset();
             ServerManager.ServerManagerDestructed += comServerExitEvent.Set;
             ServerManagerActivationFactory factory = new(activatableClassId);
             factory.RegisterActivationFactory();
             _ = ServerManager.CheckReferenceAsync();
             comServerExitEvent.Wait();
+            ServerManager.ServerManagerDestructed -= comServerExitEvent.Set;
             factory.RevokeActivationFactory();
-            comServerExitEvent = null;
+        }
+
+        /// <summary>
+        /// Starts the WinRT server with the specified activatable class ID and waits for it to exit asynchronously.
+        /// </summary>
+        /// <param name="activatableClassId">The activatable class ID to be registered.</param>
+        /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public static Task StartWinRTServerAsync(string activatableClassId, CancellationToken cancellationToken = default)
+        {
+            _ = RoInitialize(RO_INIT_MULTITHREADED);
+            TaskCompletionSource source = new();
+            ServerManagerActivationFactory factory = new(activatableClassId);
+            ServerManager.ServerManagerDestructed += OnServerManagerDestructed;
+            CancellationTokenRegistration registration = cancellationToken.Register(OnServerManagerDestructed);
+            void OnServerManagerDestructed()
+            {
+                try
+                {
+                    factory.RevokeActivationFactory();
+                    ServerManager.ServerManagerDestructed -= OnServerManagerDestructed;
+                    _ = source.TrySetResult();
+                }
+                catch (Exception ex)
+                {
+                    _ = source.TrySetException(ex);
+                }
+            }
+            factory.RegisterActivationFactory();
+            _ = ServerManager.CheckReferenceAsync();
+#if COMP_NETSTANDARD2_1
+            return source.Task.ContinueWith(_ => registration.DisposeAsync().AsTask(), default(CancellationToken)).Unwrap();
+#else
+            return source.Task.ContinueWith(_ => registration.Dispose(), default(CancellationToken));
+#endif
         }
 
         /// <summary>

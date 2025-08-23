@@ -1,5 +1,4 @@
 ﻿using ProcessForUWP.Demo.Helpers;
-using ProcessForUWP.UWP;
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
