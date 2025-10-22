@@ -194,13 +194,13 @@ namespace ProcessForUWP.UWP
         /// <returns>This function can return one of these values.</returns>
 #if NET7_0_OR_GREATER
         [LibraryImport("api-ms-win-core-winrt-l1-1-0.dll")]
-        private unsafe static partial int RoActivateInstance(nint activatableClassId, out nint instance);
+        private static partial int RoActivateInstance(nint activatableClassId, out nint instance);
 #elif NET
         [DllImport("api-ms-win-core-winrt-l1-1-0.dll", ExactSpelling = true)]
-        private unsafe static extern int RoActivateInstance([In] nint activatableClassId, [Out] out nint instance);
+        private static extern int RoActivateInstance([In] nint activatableClassId, [Out] out nint instance);
 #else
         [DllImport("api-ms-win-core-winrt-l1-1-0.dll", ExactSpelling = true)]
-        private unsafe static extern int RoActivateInstance([In] nint activatableClassId, [Out] out IServerManager instance);
+        private static extern int RoActivateInstance([In] nint activatableClassId, [Out] out IServerManager instance);
 #endif
     }
 }

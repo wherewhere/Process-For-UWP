@@ -79,7 +79,6 @@ namespace ProcessForUWP.Core
         public partial string Domain { get; set; }
         public partial bool CreateNoWindow { get; set; }
         public partial string Arguments { get; set; }
-
         public partial string WorkingDirectory { get; set; }
 
         /// <summary>

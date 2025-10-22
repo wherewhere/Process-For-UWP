@@ -56,7 +56,14 @@ namespace ProcessForUWP.Desktop
         /// </summary>
         /// <param name="handler">The handler to check if the remote object is alive.</param>
         /// <param name="period">The period to check if the remote object is alive.</param>
-        public void SetMonitor(IsAliveHandler handler, TimeSpan period) => _monitor = new RemoteMonitor(handler, Dispose, period);
+        public void SetMonitor(IsAliveHandler handler, TimeSpan period)
+        {
+            _monitor?.Stop();
+            if (period.TotalMilliseconds > 0)
+            {
+                _monitor = new RemoteMonitor(handler, Dispose, period);
+            }
+        }
 
         /// <inheritdoc/>
         public void Dispose()

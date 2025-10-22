@@ -1,0 +1,34 @@
+<Solution>
+  <Configurations>
+    <Platform Name="ARM" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Analyzers/">
+    <Project Path="../WinRTWrapper/WinRTWrapper.SourceGenerators/WinRTWrapper.SourceGenerators.csproj" />
+  </Folder>
+  <Folder Name="/Demo/">
+    <Project Path="Demo/ProcessForUWP.Demo.Delegate/ProcessForUWP.Demo.Delegate.csproj">
+      <Platform Solution="*|ARM" Project="ARM" />
+      <Platform Solution="*|ARM64" Project="ARM64" />
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="Demo/ProcessForUWP.Demo.Host/ProcessForUWP.Demo.Host.wapproj" Type="c7167f0d-bc9f-4e6e-afe1-012c56b48db5">
+      <Deploy />
+    </Project>
+    <Project Path="Demo/ProcessForUWP.Demo.Projection/ProcessForUWP.Demo.Projection.vcxproj" Id="9fbfaaf4-1001-4bbc-883a-5b7c86f2f0c7" />
+    <Project Path="Demo/ProcessForUWP.Demo/ProcessForUWP.Demo.csproj" Id="9fa1950f-5340-409c-a87c-f4da83b251c5">
+      <Platform Solution="*|ARM" Project="ARM" />
+      <Platform Solution="*|ARM64" Project="ARM64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+    </Project>
+  </Folder>
+  <Project Path="ProcessForUWP.Core/ProcessForUWP.Core.vcxproj" Id="909e1397-b1b9-4772-9266-34833a0b277c" />
+  <Project Path="ProcessForUWP.Desktop/ProcessForUWP.Desktop.csproj" />
+  <Project Path="ProcessForUWP.Projection/ProcessForUWP.Projection.csproj">
+    <BuildDependency Project="ProcessForUWP.Core/ProcessForUWP.Core.vcxproj" />
+  </Project>
+  <Project Path="ProcessForUWP.UWP/ProcessForUWP.UWP.csproj" />
+</Solution>

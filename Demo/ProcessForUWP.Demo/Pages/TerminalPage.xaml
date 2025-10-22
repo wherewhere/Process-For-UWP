@@ -30,7 +30,11 @@
                 <ColumnDefinition Width="4" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="Input" VerticalAlignment="Center" />
+            <TextBox
+                x:Name="Input"
+                VerticalAlignment="Center"
+                FontFamily="{ThemeResource CodeThemeFontFamily}"
+                IsSpellCheckEnabled="False" />
             <Button
                 Grid.Column="2"
                 VerticalAlignment="Stretch"

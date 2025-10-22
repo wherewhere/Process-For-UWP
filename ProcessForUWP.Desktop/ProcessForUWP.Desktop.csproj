@@ -4,7 +4,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ExtrasUwpMetaPackageVersion>6.2.14</ExtrasUwpMetaPackageVersion>
     <Nullable>enable</Nullable>
-    <LangVersion>preview</LangVersion>
+    <LangVersion>latest</LangVersion>
     <PackageIcon>Icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>$(PackageTags);Server;UWP;Desktop;WPF;Cli;WinFrom;Delegate</PackageTags>
@@ -25,6 +25,7 @@
     <PolySharpIncludeGeneratedTypes>
       System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute;
       System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute;
+      System.Diagnostics.CodeAnalysis.NotNullAttribute;
       System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
       System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
     </PolySharpIncludeGeneratedTypes>

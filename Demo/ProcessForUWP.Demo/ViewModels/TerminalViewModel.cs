@@ -2,6 +2,7 @@
 using ProcessForUWP.Core;
 using ProcessForUWP.Demo.Helpers;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI;

@@ -268,7 +268,7 @@ namespace ProcessForUWP.Desktop
         /// <returns>This function can return one of these values.</returns>
 #if NET7_0_OR_GREATER
         [LibraryImport("api-ms-win-core-winrt-l1-1-0.dll")]
-        private unsafe static partial int RoRegisterActivationFactories([In] nint[] activatableClassIds, [In] DllGetActivationFactory[] activationFactoryCallbacks, uint count, out nint cookie);
+        private static partial int RoRegisterActivationFactories([In] nint[] activatableClassIds, [In] DllGetActivationFactory[] activationFactoryCallbacks, uint count, out nint cookie);
 #else
         private static unsafe int RoRegisterActivationFactories(nint[] activatableClassIds, DllGetActivationFactory[] activationFactoryCallbacks, uint count, out nint cookie)
         {
@@ -369,6 +369,7 @@ namespace ProcessForUWP.Desktop
         /// <param name="activatableClassId">The activatable class ID to be registered.</param>
         public static void StartWinRTServer(string activatableClassId)
         {
+            ArgumentNullException.ThrowIfNull(activatableClassId);
             _ = RoInitialize(RO_INIT_MULTITHREADED);
             ManualResetEventSlim comServerExitEvent = new(false);
             comServerExitEvent.Reset();
@@ -389,6 +390,7 @@ namespace ProcessForUWP.Desktop
         /// <returns>A task that represents the asynchronous operation.</returns>
         public static Task StartWinRTServerAsync(string activatableClassId, CancellationToken cancellationToken = default)
         {
+            ArgumentNullException.ThrowIfNull(activatableClassId);
             _ = RoInitialize(RO_INIT_MULTITHREADED);
             TaskCompletionSource source = new();
             ServerManagerActivationFactory factory = new(activatableClassId);
@@ -447,13 +449,15 @@ namespace ProcessForUWP.Desktop
         /// <param name="period">The period to check if the remote object is alive.</param>
         public RemoteMonitor(IsAliveHandler handler, Action dispose, in TimeSpan period)
         {
+            ArgumentNullException.ThrowIfNull(handler);
+            ArgumentNullException.ThrowIfNull(dispose);
             _dispose = dispose;
             _timer = new(_ =>
             {
                 bool isAlive = false;
                 try
                 {
-                    isAlive = handler.Invoke();
+                    isAlive = handler();
                 }
                 catch
                 {
@@ -474,6 +478,18 @@ namespace ProcessForUWP.Desktop
         /// </summary>
         ~RemoteMonitor() => Dispose();
 
+        /// <summary>
+        /// Stops the monitor.
+        /// </summary>
+        public void Stop()
+        {
+            if (!disposed)
+            {
+                disposed = true;
+                _timer.Dispose();
+            }
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
@@ -481,7 +497,7 @@ namespace ProcessForUWP.Desktop
             {
                 disposed = true;
                 _timer.Dispose();
-                _dispose?.Invoke();
+                _dispose();
                 GC.SuppressFinalize(this);
             }
         }
