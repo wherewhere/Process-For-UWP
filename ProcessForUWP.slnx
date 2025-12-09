@@ -5,9 +5,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Folder Name="/Analyzers/">
-    <Project Path="../WinRTWrapper/WinRTWrapper.SourceGenerators/WinRTWrapper.SourceGenerators.csproj" />
-  </Folder>
   <Folder Name="/Demo/">
     <Project Path="Demo/ProcessForUWP.Demo.Delegate/ProcessForUWP.Demo.Delegate.csproj">
       <Platform Solution="*|ARM" Project="ARM" />

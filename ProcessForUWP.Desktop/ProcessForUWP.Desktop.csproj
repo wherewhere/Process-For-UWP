@@ -75,15 +75,14 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="WinRTWrapper" Version="0.0.1-pre.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ProcessForUWP.Projection\ProcessForUWP.Projection.csproj" />
-    <ProjectReference Include="..\..\WinRTWrapper\WinRTWrapper.SourceGenerators\WinRTWrapper.SourceGenerators.csproj">
-      <OutputItemType>Analyzer</OutputItemType>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <SetTargetFramework>TargetFramework=netstandard2.0</SetTargetFramework>
-    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'uap10.0.15138.0'))">

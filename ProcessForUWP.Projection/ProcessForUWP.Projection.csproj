@@ -36,6 +36,13 @@
     <TargetPlatformMinVersion>10.0.15138.0</TargetPlatformMinVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="WinRTWrapper" Version="0.0.1-pre.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
   <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0-windows10.0.17763.0'))">
     <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" PrivateAssets="all" />
   </ItemGroup>
@@ -61,14 +68,6 @@
     <Reference Include="ProcessForUWP.Core">
       <HintPath>..\WinMD\$(Configuration)\ProcessForUWP.Core.winmd</HintPath>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\WinRTWrapper\WinRTWrapper.SourceGenerators\WinRTWrapper.SourceGenerators.csproj">
-      <OutputItemType>Analyzer</OutputItemType>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <SetTargetFramework>TargetFramework=netstandard2.0</SetTargetFramework>
-    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
