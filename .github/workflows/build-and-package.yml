@@ -16,7 +16,7 @@ jobs:
     runs-on: windows-2022
 
     env:
-      Solution_Name: Demo/ProcessForUWP.Demo.Host/ProcessForUWP.Demo.Host.csproj
+      Solution_Name: ProcessForUWP.slnx
       Project_Directory: Demo/ProcessForUWP.Demo.Host
       Signing_Certificate: ProcessForUWP_TemporaryKey.pfx
 
@@ -68,7 +68,7 @@ jobs:
           /p:PackageCertificatePassword=$env:Password
         env:
           Appx_Bundle: Always
-          Appx_Bundle_Platforms: x86|x64|ARM|ARM64
+          Appx_Bundle_Platforms: x86|x64|ARM64
           Appx_Package_Build_Mode: SideloadOnly
           Appx_Package_Dir: AppxPackages\
           Configuration: Release

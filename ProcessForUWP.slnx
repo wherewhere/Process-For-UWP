@@ -14,7 +14,9 @@
     <Project Path="Demo/ProcessForUWP.Demo.Host/ProcessForUWP.Demo.Host.wapproj" Type="c7167f0d-bc9f-4e6e-afe1-012c56b48db5">
       <Deploy />
     </Project>
-    <Project Path="Demo/ProcessForUWP.Demo.Projection/ProcessForUWP.Demo.Projection.vcxproj" Id="9fbfaaf4-1001-4bbc-883a-5b7c86f2f0c7" />
+    <Project Path="Demo/ProcessForUWP.Demo.Projection/ProcessForUWP.Demo.Projection.vcxproj" Id="9fbfaaf4-1001-4bbc-883a-5b7c86f2f0c7">
+      <BuildDependency Project="ProcessForUWP.Core/ProcessForUWP.Core.vcxproj" />
+    </Project>
     <Project Path="Demo/ProcessForUWP.Demo/ProcessForUWP.Demo.csproj" Id="9fa1950f-5340-409c-a87c-f4da83b251c5">
       <Platform Solution="*|ARM" Project="ARM" />
       <Platform Solution="*|ARM64" Project="ARM64" />
