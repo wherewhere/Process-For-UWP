@@ -29,7 +29,7 @@ body:
   - type: dropdown
     attributes:
       label: NuGet package version
-      description: Specify the version of Mica For UWP you're using.
+      description: Specify the version of Process For UWP you're using.
       options:
         - 0.1.6
         - 0.0.5

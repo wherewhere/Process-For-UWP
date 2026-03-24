@@ -19,6 +19,7 @@
     <DesktopCompatible>true</DesktopCompatible>
     <NuGetTargetMoniker>native,Version=v0.0</NuGetTargetMoniker>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm;win-arm64</RuntimeIdentifiers>
+    <TargetFramework>native</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <ProjectCapability Include="PackageReferences" />
