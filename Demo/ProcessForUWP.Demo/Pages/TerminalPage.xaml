@@ -34,13 +34,16 @@
                 x:Name="Input"
                 VerticalAlignment="Center"
                 FontFamily="{ThemeResource CodeThemeFontFamily}"
-                IsSpellCheckEnabled="False" />
+                IsReadOnly="{x:Bind Provider.IsExited, Mode=OneWay}"
+                IsSpellCheckEnabled="False"
+                Text="{x:Bind Provider.ExitMessage, Mode=OneWay}" />
             <Button
                 Grid.Column="2"
                 VerticalAlignment="Stretch"
                 Click="Button_Click"
                 Content="&#xE724;"
-                FontFamily="{ThemeResource SymbolThemeFontFamily}">
+                FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                IsEnabled="{x:Bind viewmodels:TerminalViewModel.BoolNegationConverter(Provider.IsExited), Mode=OneWay}">
                 <Button.KeyboardAccelerators>
                     <KeyboardAccelerator Key="Enter" />
                 </Button.KeyboardAccelerators>

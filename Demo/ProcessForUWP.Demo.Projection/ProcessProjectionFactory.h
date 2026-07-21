@@ -18,13 +18,13 @@ namespace winrt::ProcessForUWP::Demo::Projection::implementation
     struct ProcessProjectionFactory : ProcessProjectionFactoryT<ProcessProjectionFactory>
     {
         static RPCType DefaultType() { return m_defaultType; }
-        static void DefaultType(RPCType const& value) { m_defaultType = value; }
+        static void DefaultType(const RPCType& value) { m_defaultType = value; }
         static IReference<guid> CLSID() { return m_clsid; }
-        static void CLSID(IReference<guid> const& value) { m_clsid = value; }
+        static void CLSID(const IReference<guid>& value) { m_clsid = value; }
         static hstring ActivatableClassID() { return m_activatableClassID; }
-        static void ActivatableClassID(hstring const& value) { m_activatableClassID = value; }
+        static void ActivatableClassID(const hstring& value) { m_activatableClassID = value; }
         static TimeSpan Timeout() { return m_timeout; }
-        static void Timeout(TimeSpan const& value) { m_timeout = value; }
+        static void Timeout(const TimeSpan& value) { m_timeout = value; }
         static IServerManager ServerManager();
         static bool IsAlive() { return true; }
     };

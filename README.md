@@ -140,6 +140,3 @@ _process.BeginOutputReadLine();
 4. OOP/WinRT 不支持沙盒与沙盒外通信，设置 `uap5:RunFullTrust="true"` 将只能与全权限应用通信
 5. `ProcessForUWP.UWP` 不支持 Native，在 `.NET Native` 或 `C++` 项目中请使用 [ProcessForUWP.Demo.Projection](./Demo/ProcessForUWP.Demo.Projection)
 6. OOP/WinRT 服务器暂时不支持 `.NET Framework`，猜测为在 AppContainer 内会运行在 `.NET Core 5.0` 上
-
-## Star 数量统计
-[![Star 数量统计](https://starchart.cc/wherewhere/ProcessForUWP.svg?variant=adaptive)](https://starchart.cc/wherewhere/ProcessForUWP "Star 数量统计")
