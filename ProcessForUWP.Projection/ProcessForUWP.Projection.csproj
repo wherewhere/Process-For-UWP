@@ -55,9 +55,18 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0-windows10.0.17763.0'))">
-    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" PrivateAssets="all" />
-  </ItemGroup>
+  <Choose>
+    <When Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0-windows10.0.17763.0'))">
+      <ItemGroup>
+        <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.3.1" PrivateAssets="all" />
+      </ItemGroup>
+    </When>
+    <When Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0-windows10.0.17763.0'))">
+      <ItemGroup>
+        <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" PrivateAssets="all" />
+      </ItemGroup>
+    </When>
+  </Choose>
 
   <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard1.0'))
                    and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.0'))
@@ -68,7 +77,7 @@
   <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.0'))
                    and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'uap10.0'))
                    and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0'))">
-    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.26100.4948" />
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.18362.2007" IsImplicitlyDefined="true" />
   </ItemGroup>
 
   <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0'))">

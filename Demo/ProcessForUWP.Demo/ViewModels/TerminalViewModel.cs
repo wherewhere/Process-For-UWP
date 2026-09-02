@@ -15,18 +15,18 @@ using Windows.UI.Xaml.Media;
 
 namespace ProcessForUWP.Demo.ViewModels
 {
-    public class TerminalViewModel(string path, TabViewItem tab) : INotifyPropertyChanged
+    public sealed class TerminalViewModel(string path, TabViewItem tab) : INotifyPropertyChanged
     {
         private IProcess _process;
 
         public CoreDispatcher Dispatcher => tab.Dispatcher;
         public RichTextBlock Block { get; set; }
         public bool IsExited => _process?.HasExited ?? true;
-        public string ExitMessage => IsExited ? $"Process exited with code {_process.ExitCode}" : string.Empty;
+        public string ExitMessage => IsExited ? $"Process exited with code {_process?.ExitCode}" : string.Empty;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected async void RaisePropertyChangedEvent([CallerMemberName] string name = null)
+        private async void RaisePropertyChangedEvent([CallerMemberName] string name = null)
         {
             if (name != null)
             {
@@ -35,7 +35,7 @@ namespace ProcessForUWP.Demo.ViewModels
             }
         }
 
-        protected async void RaisePropertyChangedEvent(params string[] names)
+        private async void RaisePropertyChangedEvent(params string[] names)
         {
             if (names?.Length > 0)
             {

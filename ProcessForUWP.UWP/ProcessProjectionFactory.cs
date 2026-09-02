@@ -108,7 +108,7 @@ namespace ProcessForUWP.UWP
             {
                 Marshal.ThrowExceptionForHR(hresult);
             }
-            IServerManager result = WinRT.Marshaler<IServerManager>.FromAbi(ppv);
+            IServerManager result = WinRT.MarshalInterface<IServerManager>.FromAbi(ppv);
 #else
             int hresult = CoCreateInstance(rclsid, 0, CLSCTX_ALL, CLSID_IUnknown, out IServerManager result);
             if (hresult < 0)
@@ -135,7 +135,7 @@ namespace ProcessForUWP.UWP
             {
                 Marshal.ThrowExceptionForHR(hresult);
             }
-            IServerManager result = WinRT.Marshaler<IServerManager>.FromAbi(instance);
+            IServerManager result = WinRT.MarshalInterface<IServerManager>.FromAbi(instance);
 #else
             int hresult = WindowsCreateString(activatableClassId, (uint)activatableClassId.Length, out var classId);
             if (hresult < 0)
