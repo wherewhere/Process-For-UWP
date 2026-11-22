@@ -1,24 +1,28 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ExtrasUwpMetaPackageVersion>6.2.14</ExtrasUwpMetaPackageVersion>
+    <NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <PackageIcon>Icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>$(PackageTags);Server;UWP;Desktop;WPF;Cli;WinFrom;Delegate</PackageTags>
-    <TargetFrameworks>net4.5;net4.6.1;net6.0-windows10.0.17763.0;net8.0-windows10.0.17763.0;netcoreapp3.1;netstandard2.0;netstandard2.1;uap10.0.15138.0</TargetFrameworks>
+    <TargetFrameworks>net4.5;net4.6.1</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);uap10.0.15138.0</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net6.0-windows10.0.17763.0;net8.0-windows10.0.17763.0</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net10.0-windows10.0.17763.0</TargetFrameworks>
     <TargetPlatformMinVersion>10.0</TargetPlatformMinVersion>
     <TargetPlatformVersion>10.0.26100.0</TargetPlatformVersion>
-    <VersionPrefix>0.1.6</VersionPrefix>
     <Description>$(Description)
 本 Nuget 包为桌面端，具体使用方法请查阅项目仓库中的 Readme。</Description>
   </PropertyGroup>
 
   <PropertyGroup>
-    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">True</IsAotCompatible>
-    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">True</IsTrimmable>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
     <SuppressTfmSupportBuildWarnings>false</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
@@ -30,6 +34,10 @@
       System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
       System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
     </PolySharpIncludeGeneratedTypes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework) == 'netcoreapp3.1'">
+    <RestoreEnablePackagePruning>false</RestoreEnablePackagePruning>
   </PropertyGroup>
 
   <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1'))">
@@ -71,11 +79,14 @@
     </Reference>
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="PolySharp" Version="1.16.0">
+  <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))">
+    <PackageReference Include="PolySharp" Version="1.17.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="WinRTWrapper" Version="0.0.1-pre.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -84,12 +95,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ProcessForUWP.Projection\ProcessForUWP.Projection.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'uap10.0.15138.0'))">
-    <ProjectReference Update="..\ProcessForUWP.Projection\ProcessForUWP.Projection.csproj">
-      <SetTargetFramework>TargetFramework=uap10.0.15138.0</SetTargetFramework>
-    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>

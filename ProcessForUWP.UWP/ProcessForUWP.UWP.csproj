@@ -1,24 +1,28 @@
-<Project Sdk="MSBuild.Sdk.Extras">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ExtrasUwpMetaPackageVersion>6.2.14</ExtrasUwpMetaPackageVersion>
+    <NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
     <Nullable>enable</Nullable>
     <PackageIcon>Icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>$(PackageTags);Client;UWP;UAP</PackageTags>
-    <TargetFrameworks>net4.5;net4.6.1;net6.0-windows10.0.17763.0;net8.0-windows10.0.17763.0;netcoreapp3.1;netstandard1.1;netstandard2.0;uap10.0;uap10.0.15138.0</TargetFrameworks>
+    <TargetFrameworks>net4.5;net4.6.1</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);uap10.0;uap10.0.15138.0</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);netstandard1.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net6.0-windows10.0.17763.0;net8.0-windows10.0.17763.0</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net10.0-windows10.0.17763.0</TargetFrameworks>
     <TargetPlatformMinVersion>10.0</TargetPlatformMinVersion>
     <TargetPlatformVersion>10.0.26100.0</TargetPlatformVersion>
-    <VersionPrefix>0.1.6</VersionPrefix>
     <Description>$(Description)
 本 Nuget 包为 UWP 端，具体使用方法请查阅项目仓库中的 Readme。</Description>
   </PropertyGroup>
 
   <PropertyGroup>
     <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
-    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">True</IsAotCompatible>
-    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">True</IsTrimmable>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
     <SuppressTfmSupportBuildWarnings>false</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 

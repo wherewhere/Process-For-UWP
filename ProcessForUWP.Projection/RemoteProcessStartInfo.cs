@@ -45,6 +45,7 @@ namespace ProcessForUWP.Core
         public partial IDictionary<string, string?> Environment { get; }
 #else
         private Dictionary<string, string?>? _environmentVariables;
+
         /// <summary>
         /// Gets the environment variables that apply to this process and its child processes.
         /// </summary>

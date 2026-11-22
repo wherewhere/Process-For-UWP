@@ -1,7 +1,13 @@
 ﻿<Project>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="*" PrivateAssets="all">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'uap'))">
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.14" PrivateAssets="all" />
+  </ItemGroup>
+
 </Project>
